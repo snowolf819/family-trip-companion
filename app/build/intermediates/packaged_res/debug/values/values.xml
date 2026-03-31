@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">家庭旅行助手</string>
+    <string name="call_emergency">一键呼叫</string>
+    <string name="day">第%1$d天</string>
+    <string name="emergency_contact">应急联系人</string>
+    <string name="input_share_code">输入分享码</string>
+    <string name="load_trip">查看行程</string>
+    <string name="loading">加载中…</string>
+    <string name="pull_to_refresh">下拉刷新</string>
+    <string name="retry">重试</string>
+    <string name="save">保存</string>
+    <string name="server_url">服务器地址</string>
+    <string name="settings">设置</string>
+    <string name="trip_not_found">行程不存在或链接已过期</string>
+    <string name="trip_overview">行程概览</string>
+    <style name="Theme.FamilyTrip" parent="android:Theme.Material.Light.NoActionBar"/>
+</resources>
