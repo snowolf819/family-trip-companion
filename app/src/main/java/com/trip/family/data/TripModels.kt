@@ -94,3 +94,37 @@ data class EmergencyPlan(
     @SerializedName("health") val health: List<EmergencyOption> = emptyList(),
     @SerializedName("transportDelay") val transportDelay: List<EmergencyOption> = emptyList()
 )
+
+// ===== 天气 & 行李模型 =====
+
+data class WeatherDay(
+    @SerializedName("date") val date: String = "",
+    @SerializedName("city") val city: String = "",
+    @SerializedName("tempMax") val tempMax: Int = 0,
+    @SerializedName("tempMin") val tempMin: Int = 0,
+    @SerializedName("textDay") val textDay: String = "",
+    @SerializedName("icon") val icon: String = "",
+    @SerializedName("windDir") val windDir: String = "",
+    @SerializedName("windScale") val windScale: String = "",
+    @SerializedName("humidity") val humidity: Int = 0
+)
+
+data class PackingItem(
+    @SerializedName("id") val id: String = "",
+    @SerializedName("name") val name: String = "",
+    @SerializedName("essential") val essential: Boolean = false,
+    @SerializedName("condition") val condition: String? = null,
+    @SerializedName("checked") val checked: Boolean = false
+)
+
+data class PackingCategory(
+    @SerializedName("name") val name: String = "",
+    @SerializedName("items") val items: List<PackingItem> = emptyList()
+)
+
+data class PackingListResponse(
+    @SerializedName("tripId") val tripId: String = "",
+    @SerializedName("categories") val categories: List<PackingCategory> = emptyList(),
+    @SerializedName("generatedAt") val generatedAt: String = "",
+    @SerializedName("weatherNote") val weatherNote: String = ""
+)

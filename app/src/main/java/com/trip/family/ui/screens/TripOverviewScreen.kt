@@ -38,7 +38,9 @@ fun TripOverviewScreen(
     viewModel: TripViewModel = viewModel(),
     onDayClick: (Int) -> Unit = {},
     onBack: () -> Unit = {},
-    onOpenSettings: () -> Unit = {} // 保留用于未来扩展
+    onOpenSettings: () -> Unit = {},
+    onWeatherClick: () -> Unit = {},
+    onPackingClick: () -> Unit = {}
 ) {
     val trip by viewModel.trip.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -122,6 +124,29 @@ fun TripOverviewScreen(
                 // 应急联系人
                 item {
                     EmergencyContactCard(currentTrip.emergencyContact)
+                }
+
+                // 天气 & 行李入口
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = onWeatherClick,
+                            modifier = Modifier.weight(1f).height(56.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text("🌤️ 查看天气", fontSize = 18.sp)
+                        }
+                        OutlinedButton(
+                            onClick = onPackingClick,
+                            modifier = Modifier.weight(1f).height(56.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text("🧳 行李清单", fontSize = 18.sp)
+                        }
+                    }
                 }
 
                 // 天数概览列表

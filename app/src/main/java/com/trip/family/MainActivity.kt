@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-enum class Screen { Home, Overview, DayDetail, Settings }
+enum class Screen { Home, Overview, DayDetail, Settings, Weather, Packing }
 
 @Composable
 fun AppNavigation(
@@ -65,6 +65,7 @@ fun AppNavigation(
     BackHandler(enabled = currentScreen != Screen.Home) {
         currentScreen = when (currentScreen) {
             Screen.DayDetail -> Screen.Overview
+            Screen.Weather, Screen.Packing -> Screen.Overview
             Screen.Overview, Screen.Settings -> Screen.Home
             Screen.Home -> Screen.Home
         }
@@ -82,7 +83,9 @@ fun AppNavigation(
                 currentScreen = Screen.DayDetail
             },
             onBack = { currentScreen = Screen.Home },
-            onOpenSettings = { currentScreen = Screen.Settings }
+            onOpenSettings = { currentScreen = Screen.Settings },
+            onWeatherClick = { currentScreen = Screen.Weather },
+            onPackingClick = { currentScreen = Screen.Packing }
         )
         Screen.DayDetail -> com.trip.family.ui.screens.DayDetailScreen(
             dayNumber = selectedDayNumber,
@@ -93,6 +96,12 @@ fun AppNavigation(
             prefs = prefs,
             onBack = { currentScreen = Screen.Home },
             onSaved = { currentScreen = Screen.Home }
+        )
+        Screen.Weather -> com.trip.family.ui.screens.WeatherScreen(
+            onBack = { currentScreen = Screen.Overview }
+        )
+        Screen.Packing -> com.trip.family.ui.screens.PackingScreen(
+            onBack = { currentScreen = Screen.Overview }
         )
     }
 }

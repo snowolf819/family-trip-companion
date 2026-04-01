@@ -1,7 +1,10 @@
 package com.trip.family.api
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.trip.family.data.PackingListResponse
 import com.trip.family.data.Trip
+import com.trip.family.data.WeatherDay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
@@ -48,6 +51,27 @@ object TripApi {
         val url = "$cleanBase/api/trips/share/$token"
         val json = fetch(url)
         return gson.fromJson(json, Trip::class.java)
+    }
+
+    /**
+     * 获取行程天气信息
+     * GET {baseUrl}/api/trips/{tripId}/weather
+     */
+    suspend fun fetchWeather(baseUrl: String, tripId: String): List<WeatherDay> {
+        val url = "${baseUrl.trimEnd('/')}/api/trips/$tripId/weather"
+        val json = fetch(url)
+        val type = object : TypeToken<List<WeatherDay>>() {}.type
+        return gson.fromJson(json, type)
+    }
+
+    /**
+     * 获取行李清单
+     * GET {baseUrl}/api/trips/{tripId}/packing
+     */
+    suspend fun fetchPackingList(baseUrl: String, tripId: String): PackingListResponse {
+        val url = "${baseUrl.trimEnd('/')}/api/trips/$tripId/packing"
+        val json = fetch(url)
+        return gson.fromJson(json, PackingListResponse::class.java)
     }
 }
 

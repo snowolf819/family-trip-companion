@@ -8,6 +8,8 @@ import com.trip.family.api.ApiException
 import com.trip.family.api.TripApi
 import com.trip.family.data.Trip
 import com.trip.family.data.MockTripData
+import com.trip.family.data.PackingListResponse
+import com.trip.family.data.WeatherDay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +28,12 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
     private val _trip = MutableStateFlow<Trip?>(null)
     val trip: StateFlow<Trip?> = _trip.asStateFlow()
 
+    private val _weather = MutableStateFlow<List<WeatherDay>>(emptyList())
+    val weather: StateFlow<List<WeatherDay>> = _weather.asStateFlow()
+
+    private val _packingList = MutableStateFlow<PackingListResponse?>(null)
+    val packingList: StateFlow<PackingListResponse?> = _packingList.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -43,6 +51,8 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
         get() = preferences.serverUrl
 
     private var loadJob: Job? = null
+    private var weatherJob: Job? = null
+    private var packingJob: Job? = null
 
     /**
      * 通过分享 token 加载行程（深度链接入口）
@@ -61,6 +71,9 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
                 preferences.cachedAt = System.currentTimeMillis()
                 _hasCache.value = true
                 _navigateToOverview.emit(true)
+                // 加载天气和行李（复用 loadJob 的 scope，随其取消）
+                launch { loadWeather(trip.tripId) }
+                launch { loadPackingList(trip.tripId) }
             } catch (e: ApiException) {
                 if (e.statusCode == 404) {
                     _errorMessage.value = "行程不存在或链接已过期"
@@ -87,6 +100,7 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * 加载缓存行程并导航到详情页
+     * 同时尝试加载天气和行李（有网则更新，无网则保持空）
      */
     fun loadCachedTrip() {
         val cached = preferences.cachedTrip
@@ -94,12 +108,37 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
             _trip.value = cached
             viewModelScope.launch {
                 _navigateToOverview.emit(true)
+                // 尝试刷新天气和行李
+                launch { loadWeather(cached.tripId) }
+                launch { loadPackingList(cached.tripId) }
             }
         }
     }
 
     fun updateServerUrl(url: String) {
         preferences.serverUrl = url.trimEnd('/')
+    }
+
+    /**
+     * 加载天气（挂载到指定协程 scope，可随父 job 取消）
+     */
+    suspend fun loadWeather(tripId: String) {
+        try {
+            _weather.value = TripApi.fetchWeather(preferences.serverUrl, tripId)
+        } catch (_: Exception) {
+            _weather.value = emptyList()
+        }
+    }
+
+    /**
+     * 加载行李清单（挂载到指定协程 scope，可随父 job 取消）
+     */
+    suspend fun loadPackingList(tripId: String) {
+        try {
+            _packingList.value = TripApi.fetchPackingList(preferences.serverUrl, tripId)
+        } catch (_: Exception) {
+            _packingList.value = null
+        }
     }
 
     fun clearError() {
