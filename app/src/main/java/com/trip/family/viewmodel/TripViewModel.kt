@@ -7,6 +7,7 @@ import com.trip.family.TripPreferences
 import com.trip.family.api.ApiException
 import com.trip.family.api.TripApi
 import com.trip.family.data.Trip
+import com.trip.family.data.MockTripData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,7 +86,7 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * 加载缓存行程（不触发导航）
+     * 加载缓存行程并导航到详情页
      */
     fun loadCachedTrip() {
         val cached = preferences.cachedTrip
@@ -109,10 +110,15 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
      * 加载模拟数据（预览用，不依赖后端）
      */
     fun loadMockTrip() {
-        val mock = com.trip.family.data.MockTripData.sampleTrip
-        _trip.value = mock
-        viewModelScope.launch {
-            _navigateToOverview.emit(true)
+        _errorMessage.value = null
+        _isLoading.value = false
+        try {
+            _trip.value = MockTripData.sampleTrip
+            viewModelScope.launch {
+                _navigateToOverview.emit(true)
+            }
+        } catch (e: Exception) {
+            _errorMessage.value = "模拟数据加载失败: ${e.message}"
         }
     }
 }

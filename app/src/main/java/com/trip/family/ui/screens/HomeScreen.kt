@@ -2,6 +2,8 @@ package com.trip.family.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trip.family.viewmodel.TripViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 /**
  * 入口屏幕：深度链接打开自动加载，否则显示欢迎页+分享码输入
@@ -21,7 +23,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 @Composable
 fun HomeScreen(
     viewModel: TripViewModel = viewModel(),
-    shareTokenFlow: MutableSharedFlow<String>? = null,
+    shareTokenFlow: SharedFlow<String>? = null,
     onTripLoaded: () -> Unit = {},
     onOpenSettings: () -> Unit = {}
 ) {
@@ -31,15 +33,15 @@ fun HomeScreen(
 
     var shareCode by remember { mutableStateOf("") }
 
-    // 监听网络加载成功事件才导航（缓存加载不触发）
-    LaunchedEffect(Unit) {
+    // 监听导航事件
+    LaunchedEffect(viewModel) {
         viewModel.navigateToOverview.collect {
             onTripLoaded()
         }
     }
 
     // 监听深度链接 token（从 MainActivity 的 onNewIntent 传入）
-    LaunchedEffect(Unit) {
+    LaunchedEffect(shareTokenFlow) {
         shareTokenFlow?.collect { token ->
             viewModel.loadTripByToken(token)
         }
@@ -48,6 +50,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -133,7 +136,7 @@ fun HomeScreen(
             }
         }
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(32.dp))
 
         TextButton(onClick = onOpenSettings) {
             Text("⚙️ 设置服务器地址", fontSize = 14.sp)
