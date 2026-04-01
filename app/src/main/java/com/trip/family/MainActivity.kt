@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import com.trip.family.ui.screens.extractShareToken
 import com.trip.family.ui.theme.FamilyTripTheme
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,8 +24,15 @@ class MainActivity : ComponentActivity() {
         handleIntent(intent)
         enableEdgeToEdge()
         setContent {
-            FamilyTripTheme {
-                AppNavigation(shareTokenFlow = shareTokenFlow)
+            val context = LocalContext.current
+            val prefs = remember(context) { com.trip.family.TripPreferences(context) }
+            val currentFontScale = remember { mutableFloatStateOf(prefs.fontScale) }
+            FamilyTripTheme(fontScale = currentFontScale.floatValue) {
+                AppNavigation(
+                    shareTokenFlow = shareTokenFlow,
+                    fontScaleState = currentFontScale,
+                    prefs = prefs
+                )
             }
         }
     }
@@ -45,7 +53,11 @@ class MainActivity : ComponentActivity() {
 enum class Screen { Home, Overview, DayDetail, Settings }
 
 @Composable
-fun AppNavigation(shareTokenFlow: MutableSharedFlow<String>) {
+fun AppNavigation(
+    shareTokenFlow: MutableSharedFlow<String>,
+    fontScaleState: MutableFloatState,
+    prefs: com.trip.family.TripPreferences
+) {
     var currentScreen by remember { mutableStateOf(Screen.Home) }
     var selectedDayNumber by remember { mutableIntStateOf(0) }
 
@@ -77,6 +89,8 @@ fun AppNavigation(shareTokenFlow: MutableSharedFlow<String>) {
             onBack = { currentScreen = Screen.Overview }
         )
         Screen.Settings -> com.trip.family.ui.screens.SettingsScreen(
+            fontScaleState = fontScaleState,
+            prefs = prefs,
             onBack = { currentScreen = Screen.Home },
             onSaved = { currentScreen = Screen.Home }
         )

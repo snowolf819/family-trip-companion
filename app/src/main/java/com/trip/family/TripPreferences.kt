@@ -31,6 +31,11 @@ class TripPreferences(context: Context) {
         get() = prefs.getLong("cached_at", 0L)
         set(value) = prefs.edit().putLong("cached_at", value).apply()
 
+    /** 字体缩放比例：1.0 标准，0.8 小字，1.2 大字，1.4 超大字 */
+    var fontScale: Float
+        get() = prefs.getFloat("font_scale", 1.0f)
+        set(value) = prefs.edit().putFloat("font_scale", value.coerceIn(0.8f, 1.4f)).apply()
+
     val hasCachedTrip: Boolean
         get() = prefs.contains("cached_trip") && prefs.getString("last_share_token", null).isNullOrBlank().not()
 
