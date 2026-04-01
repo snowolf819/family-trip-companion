@@ -3,6 +3,8 @@ package com.trip.family.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.trip.family.TripPreferences
 import com.trip.family.api.ApiException
 import com.trip.family.api.TripApi
@@ -10,6 +12,8 @@ import com.trip.family.data.Trip
 import com.trip.family.data.MockTripData
 import com.trip.family.data.PackingListResponse
 import com.trip.family.data.WeatherDay
+import com.trip.family.location.LocationService
+import com.trip.family.location.LocationResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +28,8 @@ import java.net.URL
 class TripViewModel(application: Application) : AndroidViewModel(application) {
 
     private val preferences = TripPreferences(application)
+    private val fusedLocationClient: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(application)
 
     private val _trip = MutableStateFlow<Trip?>(null)
     val trip: StateFlow<Trip?> = _trip.asStateFlow()
@@ -43,6 +49,14 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
     private val _hasCache = MutableStateFlow(preferences.hasCachedTrip)
     val hasCache: StateFlow<Boolean> = _hasCache.asStateFlow()
 
+    /** 当前定位城市 */
+    private val _currentCity = MutableStateFlow("")
+    val currentCity: StateFlow<String> = _currentCity.asStateFlow()
+
+    /** 定位中 */
+    private val _isLocating = MutableStateFlow(false)
+    val isLocating: StateFlow<Boolean> = _isLocating.asStateFlow()
+
     /** 事件：网络加载成功后通知导航 */
     private val _navigateToOverview = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
     val navigateToOverview: SharedFlow<Boolean> = _navigateToOverview.asSharedFlow()
@@ -51,8 +65,6 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
         get() = preferences.serverUrl
 
     private var loadJob: Job? = null
-    private var weatherJob: Job? = null
-    private var packingJob: Job? = null
 
     /**
      * 通过分享 token 加载行程（深度链接入口）
@@ -118,6 +130,36 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
     fun updateServerUrl(url: String) {
         preferences.serverUrl = url.trimEnd('/')
     }
+
+    // ─── 定位相关 ───────────────────────────────────────────
+
+    /**
+     * 请求定位（需已获取权限）
+     * 成功后更新 _currentCity
+     */
+    fun requestLocation() {
+        if (_isLocating.value) return
+        _isLocating.value = true
+        viewModelScope.launch {
+            when (val result = LocationService.getCurrentLocation(fusedLocationClient)) {
+                is LocationResult.Success -> {
+                    val city = LocationService.reverseGeocode(
+                        getApplication(), result.lat, result.lng
+                    )
+                    _currentCity.value = city
+                }
+                is LocationResult.Error -> {
+                    // 定位失败静默处理，不影响主流程
+                }
+            }
+            _isLocating.value = false
+        }
+    }
+
+    /**
+     * 获取当前定位城市名
+     */
+    fun getCurrentCity(): String = _currentCity.value
 
     /**
      * 加载天气（挂载到指定协程 scope，可随父 job 取消）
