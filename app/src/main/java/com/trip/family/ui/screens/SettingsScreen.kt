@@ -15,7 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trip.family.viewmodel.TripViewModel
 import kotlinx.coroutines.delay
@@ -46,7 +45,7 @@ fun SettingsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("设置", fontSize = 20.sp) },
+                title = { Text("设置", style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
@@ -66,7 +65,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(8.dp))
 
             // ========== 字体大小 ==========
-            Text("🔤 字体大小", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("🔤 字体大小", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
 
             // 预览文字
             Card(
@@ -79,14 +78,14 @@ fun SettingsScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         "预览效果",
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
                         "这是一段预览文字，调整下方滑块查看效果变化。",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -97,7 +96,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("小", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("小", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Slider(
                     value = currentScale,
                     onValueChange = { newValue ->
@@ -109,14 +108,14 @@ fun SettingsScreen(
                     steps = 2,
                     modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
                 )
-                Text("超大", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("超大", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             // 当前档位显示
             val label = fontScaleOptions.minByOrNull { Math.abs(it.first - currentScale) }?.second ?: "标准"
             Text(
                 "当前：$label (${(currentScale * 100).toInt()}%)",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.primary
@@ -125,10 +124,10 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
             // ========== 服务器地址 ==========
-            Text("🌐 服务器地址", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("🌐 服务器地址", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Text(
                 "App 通过此地址获取行程数据。如子女告知了新地址，在此修改。",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -140,7 +139,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 18.sp)
+                textStyle = androidx.compose.ui.text.TextStyle(fontSize = androidx.compose.ui.unit.TextUnit.Unspecified)
             )
 
             Button(
@@ -155,7 +154,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("保存", fontSize = 20.sp)
+                Text("保存", style = MaterialTheme.typography.titleLarge)
             }
 
             Spacer(Modifier.height(24.dp))

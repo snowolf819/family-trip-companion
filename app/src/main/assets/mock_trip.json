@@ -1,0 +1,196 @@
+{
+  "trip_id": "mock-001",
+  "title": "北京-西安-成都 家庭五日游",
+  "date_range": {"start": "2026-05-01", "end": "2026-05-05"},
+  "emergencyContact": {"name": "小明", "phone": "13800138000"},
+  "days": [
+    {
+      "id": "d1", "day_number": 1, "date": "2026-05-01", "city": "北京",
+      "summary": ["抵达北京，入住酒店休息", "下午自由活动，逛王府井", "晚餐品尝全聚德烤鸭"],
+      "segments": [
+        {
+          "id": "s1", "type": "arrive", "title": "抵达北京", "subtitle": "抵达北京首都国际机场",
+          "transport": {"mode": "飞机", "departure_station": "上海虹桥", "arrival_station": "北京首都T3", "departure_time": "08:30", "duration_minutes": 150, "price_per_person": 1200},
+          "elderly_notes": "机场大，走动多，建议行李托运，穿舒适鞋子",
+          "highlights": ["提前2小时到达机场", "带好身份证和医保卡"]
+        },
+        {
+          "id": "s2", "type": "transport", "title": "机场到酒店",
+          "transportRoute": {"from": "首都机场T3", "to": "王府井希尔顿", "mode": "机场快轨+地铁", "duration_minutes": 45, "price": 35, "route": "机场快轨到东直门换乘2号线到建国门换乘1号线到王府井站B口出"},
+          "elderly_notes": "机场快轨有电梯，地铁换乘注意台阶"
+        },
+        {
+          "id": "s3", "type": "meal", "title": "午餐 - 全聚德烤鸭", "subtitle": "王府井全聚德起源店",
+          "route": "王府井大街198号（距酒店步行5分钟）",
+          "meal_recommendation": "招牌烤鸭（半只约168元），配荷叶饼、葱丝、甜面酱，必点！鸭架汤也很鲜",
+          "notes": "建议11:30前到，避开排队高峰",
+          "caution": ["人多拥挤，注意随身物品", "地面可能滑，小心行走"]
+        },
+        {
+          "id": "s4", "type": "hotel", "title": "入住酒店", "subtitle": "王府井希尔顿酒店",
+          "route": "酒店距地铁站300米，位置便利"
+        }
+      ],
+      "hotelCard": {
+        "name": "北京王府井希尔顿酒店", "stars": 5, "score": 4.6,
+        "address": "北京市东城区王府井东街8号", "phone": "010-58128888",
+        "stationDistanceKm": 3.2, "taxiPrice": 20, "busStopMeters": 150,
+        "busLines": ["1路", "52路", "82路"],
+        "restaurantsWithin500m": 28, "convenienceStoresWithin500m": 5,
+        "priceMin": 688, "priceMax": 1288
+      },
+      "emergencyPlan": {
+        "weather": [{"title": "大雨/暴雨", "detail": "如遇大雨，户外行程改为室内：故宫到国家博物馆到王府井购物", "tips": ["随身带折叠伞", "酒店前台有免费雨伞借用"]}],
+        "health": [{"title": "身体不适", "detail": "酒店附近有北京协和医院（三甲），距酒店约1.5公里", "tips": ["携带常用药品（降压药、止泻药）", "医保卡放在随身包里"]}],
+        "transportDelay": [{"title": "航班延误", "detail": "联系旅行社改签，或退票改高铁（京沪高铁约4.5小时）", "tips": ["保留好航班延误证明，可申请赔偿"]}]
+      }
+    },
+    {
+      "id": "d2", "day_number": 2, "date": "2026-05-02", "city": "北京",
+      "summary": ["上午游览故宫博物院", "下午逛景山公园，俯瞰故宫全景", "晚上王府井步行街自由活动"],
+      "segments": [
+        {
+          "id": "s5", "type": "sightseeing", "title": "故宫博物院", "subtitle": "中国最大的古代宫殿建筑群",
+          "route": "从酒店步行至天安门东地铁站，乘坐1号线到天安门东，步行5分钟到午门入口",
+          "elderly_notes": "故宫很大，全程步行约3-4公里，建议租轮椅或在中轴线参观后从神武门出",
+          "highlights": ["建议从午门进，沿中轴线参观", "太和殿、乾清宫、御花园必看", "可以租借轮椅（午门服务处，免费）"],
+          "notes": "门票需提前在微信小程序预约",
+          "caution": ["地面有些地方不平整，注意脚下", "人多时容易走散，约定集合点"]
+        },
+        {
+          "id": "s6", "type": "sightseeing", "title": "景山公园", "subtitle": "登万春亭俯瞰故宫全景",
+          "route": "故宫神武门出来正对面就是景山公园南门",
+          "elderly_notes": "山顶有台阶，约200级，体力不好的可以在山下广场休息",
+          "highlights": ["万春亭是北京最佳拍照点", "可以拍到故宫中轴线全景"],
+          "caution": ["台阶较陡，上慢下更要慢", "山顶风大，注意保暖"]
+        },
+        {
+          "id": "s7", "type": "meal", "title": "午餐 - 故宫冰窖餐厅", "subtitle": "故宫内的特色餐厅",
+          "meal_recommendation": "宫廷奶酪、艾窝窝、豌豆黄等北京特色小吃",
+          "notes": "位于慈宁宫附近，建议11:30前去"
+        },
+        {
+          "id": "s8", "type": "free", "title": "自由活动 - 王府井步行街", "subtitle": "购物、品尝小吃",
+          "notes": "王府井夜市18:00开始营业",
+          "caution": ["注意保管钱包和手机"]
+        }
+      ],
+      "hotelCard": {
+        "name": "北京王府井希尔顿酒店", "stars": 5, "score": 4.6,
+        "address": "北京市东城区王府井东街8号", "phone": "010-58128888",
+        "stationDistanceKm": 3.2, "taxiPrice": 20, "busStopMeters": 150,
+        "busLines": ["1路", "52路", "82路"],
+        "restaurantsWithin500m": 28, "convenienceStoresWithin500m": 5,
+        "priceMin": 688, "priceMax": 1288
+      }
+    },
+    {
+      "id": "d3", "day_number": 3, "date": "2026-05-03", "city": "西安",
+      "summary": ["高铁前往西安（约4.5小时）", "下午游览大雁塔", "晚上回民街品尝美食"],
+      "segments": [
+        {
+          "id": "s9", "type": "intercity", "title": "北京到西安", "subtitle": "京西高铁 G87次",
+          "transport": {"mode": "高铁", "departure_station": "北京西站", "arrival_station": "西安北站", "departure_time": "09:00", "duration_minutes": 270, "price_per_person": 515},
+          "elderly_notes": "高铁座位宽敞，但行程较长，建议带个靠垫。车上可以走动活动",
+          "highlights": ["提前30分钟到站安检", "二等座就很舒适", "车上可以充电"],
+          "caution": ["过安检要拿好身份证", "大件行李可以放行李架"]
+        },
+        {
+          "id": "s10", "type": "sightseeing", "title": "大雁塔", "subtitle": "唐代著名佛教建筑",
+          "route": "西安北站乘地铁2号线到小寨换乘3号线到大雁塔站",
+          "elderly_notes": "大雁塔广场很大，可以只看外景，不登塔",
+          "highlights": ["北广场音乐喷泉晚上8点开始", "南广场有玄奘铜像"],
+          "notes": "大雁塔登塔需要另买票，老年人建议只在广场参观"
+        },
+        {
+          "id": "s11", "type": "meal", "title": "晚餐 - 回民街", "subtitle": "西安最著名的美食街",
+          "route": "大雁塔乘地铁到钟楼，步行至回民街",
+          "meal_recommendation": "必吃：羊肉泡馍（老孙家）、肉夹馍（樊记）、biangbiang面、石榴汁",
+          "highlights": ["老孙家泡馍最正宗", "柿子饼、酸梅汤解腻"],
+          "caution": ["人多拥挤，注意随身物品", "有些店不对老人友好，找有座位的店"]
+        }
+      ],
+      "hotelCard": {
+        "name": "西安钟楼亚朵酒店", "stars": 4, "score": 4.7,
+        "address": "西安市碑林区南大街60号", "phone": "029-87208888",
+        "stationDistanceKm": 5.8, "taxiPrice": 18, "busStopMeters": 80,
+        "busLines": ["600路", "609路"],
+        "restaurantsWithin500m": 35, "convenienceStoresWithin500m": 8,
+        "priceMin": 388, "priceMax": 588
+      }
+    },
+    {
+      "id": "d4", "day_number": 4, "date": "2026-05-04", "city": "成都",
+      "summary": ["高铁前往成都（约4小时）", "下午游览宽窄巷子", "晚上看川剧变脸表演"],
+      "segments": [
+        {
+          "id": "s12", "type": "intercity", "title": "西安到成都", "subtitle": "西成高铁 D1935次",
+          "transport": {"mode": "高铁", "departure_station": "西安北站", "arrival_station": "成都东站", "departure_time": "10:00", "duration_minutes": 240, "price_per_person": 263},
+          "highlights": ["沿途经过秦岭，风景很美", "车上可以点外卖"]
+        },
+        {
+          "id": "s13", "type": "sightseeing", "title": "宽窄巷子", "subtitle": "成都最具特色的历史文化街区",
+          "route": "成都东站乘地铁2号线到天府广场换乘4号线到宽窄巷子站",
+          "elderly_notes": "巷子是青石板路，有些地方不平，穿防滑鞋。不要走太快",
+          "meal_recommendation": "三大炮、龙抄手、赖汤圆、钟水饺",
+          "highlights": ["宽巷子看老建筑", "窄巷子有很多特色小店", "可以喝盖碗茶休息"],
+          "notes": "下午2-4点人最少",
+          "caution": ["石板路湿滑，雨天小心", "巷子容易迷路，记住出口方向"]
+        },
+        {
+          "id": "s14", "type": "sightseeing", "title": "川剧变脸表演", "subtitle": "蜀风雅韵川剧院",
+          "route": "宽窄巷子步行约15分钟",
+          "notes": "演出时间19:30，约1.5小时",
+          "highlights": ["变脸、吐火是经典节目", "建议提前买票，现场可能没位子"],
+          "caution": ["演出时禁止拍照录像", "剧场内有空调，带件薄外套"]
+        }
+      ],
+      "hotelCard": {
+        "name": "成都春熙路全季酒店", "stars": 4, "score": 4.5,
+        "address": "成都市锦江区春熙路99号", "phone": "028-86618888",
+        "stationDistanceKm": 4.5, "taxiPrice": 15, "busStopMeters": 50,
+        "busLines": ["3路", "58路"],
+        "restaurantsWithin500m": 42, "convenienceStoresWithin500m": 12,
+        "priceMin": 328, "priceMax": 498
+      }
+    },
+    {
+      "id": "d5", "day_number": 5, "date": "2026-05-05", "city": "成都",
+      "summary": ["上午游览大熊猫繁育研究基地", "下午逛锦里古街", "晚上返程"],
+      "segments": [
+        {
+          "id": "s15", "type": "sightseeing", "title": "成都大熊猫繁育研究基地", "subtitle": "近距离观看大熊猫",
+          "route": "酒店乘地铁3号线到熊猫大道站，换乘景区直通车",
+          "elderly_notes": "景区很大，建议坐景区观光车（10元/人）。尽量上午去，熊猫下午睡觉",
+          "highlights": ["建议早上8点到，喂食时间是8:30和11:00", "太阳产房可以看熊猫幼崽", "观光车一定要坐，不然走不动"],
+          "notes": "门票55元，60岁以上半价，65岁以上免费",
+          "caution": ["景区人多，注意安全", "不要大声喧哗，会吓到熊猫", "不能投喂食物"]
+        },
+        {
+          "id": "s16", "type": "meal", "title": "午餐 - 火锅", "subtitle": "小龙坎火锅（春熙路店）",
+          "meal_recommendation": "鸳鸯锅底（辣+不辣），必点：毛肚、鹅肠、黄喉、酥肉",
+          "notes": "不能吃辣一定要点鸳鸯锅",
+          "caution": ["火锅店人多，可能要排队", "小心烫伤", "不适合老年人久坐的可以打包"]
+        },
+        {
+          "id": "s17", "type": "sightseeing", "title": "锦里古街", "subtitle": "成都西蜀历史上最古老的商业街之一",
+          "route": "春熙路乘地铁1号线到锦里站",
+          "meal_recommendation": "张飞牛肉、糖油果子、钵钵鸡",
+          "highlights": ["适合下午悠闲逛", "有很多手工艺品店"]
+        },
+        {
+          "id": "s18", "type": "intercity", "title": "返程 - 成都到上海", "subtitle": "川航 3U8801次",
+          "transport": {"mode": "飞机", "departure_station": "成都双流T2", "arrival_station": "上海虹桥T2", "departure_time": "20:00", "duration_minutes": 180, "price_per_person": 980},
+          "elderly_notes": "提前2小时到机场，航班较晚注意保暖",
+          "caution": ["带好所有行李和证件", "检查有没有遗落物品在酒店"]
+        }
+      ],
+      "hotelCard": null,
+      "emergencyPlan": {
+        "weather": [],
+        "health": [{"title": "身体不适", "detail": "成都华西医院（全国排名前三的三甲医院），距春熙路约5公里", "tips": ["华西挂号很难，建议提前在APP预约", "如急需就医可直接去急诊"]}],
+        "transportDelay": []
+      }
+    }
+  ]
+}

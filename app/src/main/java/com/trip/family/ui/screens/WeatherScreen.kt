@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trip.family.data.WeatherDay
 import com.trip.family.location.LocationService
@@ -33,6 +32,7 @@ fun WeatherScreen(
     val weather by viewModel.weather.collectAsState()
     val currentCity by viewModel.currentCity.collectAsState()
     val isLocating by viewModel.isLocating.collectAsState()
+    val weatherError by viewModel.weatherError.collectAsState()
     val context = LocalContext.current
 
     // 定位权限请求
@@ -60,7 +60,7 @@ fun WeatherScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("🌤️ 旅行天气", fontSize = 20.sp) },
+                title = { Text("🌤️ 旅行天气", style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
@@ -69,13 +69,26 @@ fun WeatherScreen(
             )
         }
     ) { padding ->
-        if (weather.isEmpty() && currentCity.isBlank()) {
+        if (weatherError) {
+            Box(Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("天气数据加载失败", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                    Spacer(Modifier.height(12.dp))
+                    Button(onClick = {
+                        viewModel.clearWeatherError()
+                        viewModel.refreshTrip()
+                    }) {
+                        Text("重试")
+                    }
+                }
+            }
+        } else if (weather.isEmpty() && currentCity.isBlank()) {
             // 完全没数据
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("暂无天气数据", fontSize = 20.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("暂无天气数据", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(16.dp))
-                    Text("加载行程后可查看旅行天气预报", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("加载行程后可查看旅行天气预报", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
@@ -105,7 +118,7 @@ fun WeatherScreen(
                                         strokeWidth = 2.dp
                                     )
                                     Spacer(Modifier.width(12.dp))
-                                    Text("正在定位…", fontSize = 18.sp)
+                                    Text("正在定位…", style = MaterialTheme.typography.titleMedium)
                                 } else if (currentCity.isNotBlank()) {
                                     Icon(
                                         Icons.Default.LocationOn,
@@ -116,7 +129,7 @@ fun WeatherScreen(
                                     Spacer(Modifier.width(8.dp))
                                     Text(
                                         "📍 当前位置：$currentCity",
-                                        fontSize = 20.sp,
+                                        style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Medium
                                     )
                                 } else {
@@ -127,7 +140,7 @@ fun WeatherScreen(
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     Spacer(Modifier.width(8.dp))
-                                    Text("未定位", fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("未定位", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
 
@@ -141,7 +154,7 @@ fun WeatherScreen(
                                     ) },
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
-                                    Text("开启定位", fontSize = 16.sp)
+                                    Text("开启定位", style = MaterialTheme.typography.bodyLarge)
                                 }
                             } else if (currentCity.isBlank() && !isLocating) {
                                 IconButton(onClick = { viewModel.requestLocation() }) {
@@ -157,7 +170,7 @@ fun WeatherScreen(
                     item {
                         Text(
                             "📋 旅行天气预报",
-                            fontSize = 22.sp,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -194,24 +207,24 @@ private fun WeatherDayCard(day: WeatherDay, isCurrentCity: Boolean = false) {
             ) {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(day.date, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                        Text(day.date, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                         if (isCurrentCity) {
                             Spacer(Modifier.width(8.dp))
-                            Text("📍 当前", fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+                            Text("📍 当前", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
                         }
                     }
-                    Text(day.city, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(day.city, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Text("${day.icon} ${day.textDay}", fontSize = 24.sp)
+                Text("${day.icon} ${day.textDay}", style = MaterialTheme.typography.headlineSmall)
             }
             Spacer(Modifier.height(12.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text("🌡️ ${day.tempMin}° ~ ${day.tempMax}°", fontSize = 22.sp, fontWeight = FontWeight.Medium)
-                Text("💨 ${day.windDir} ${day.windScale}", fontSize = 18.sp)
-                Text("💧 ${day.humidity}%", fontSize = 18.sp)
+                Text("🌡️ ${day.tempMin}° ~ ${day.tempMax}°", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Medium)
+                Text("💨 ${day.windDir} ${day.windScale}", style = MaterialTheme.typography.titleMedium)
+                Text("💧 ${day.humidity}%", style = MaterialTheme.typography.titleMedium)
             }
         }
     }

@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.trip.family.TripPreferences
+import com.trip.family.TripApplication
 import com.trip.family.api.ApiException
 import com.trip.family.api.TripApi
 import com.trip.family.data.Trip
@@ -22,12 +22,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.net.MalformedURLException
-import java.net.URL
 
 class TripViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val preferences = TripPreferences(application)
+    private val preferences = (getApplication() as TripApplication).preferences
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(application)
 
@@ -56,6 +54,20 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
     /** 定位中 */
     private val _isLocating = MutableStateFlow(false)
     val isLocating: StateFlow<Boolean> = _isLocating.asStateFlow()
+
+    /** 错误状态 */
+    private val _locationError = MutableStateFlow<String?>(null)
+    val locationError: StateFlow<String?> = _locationError.asStateFlow()
+
+    private val _weatherError = MutableStateFlow(false)
+    val weatherError: StateFlow<Boolean> = _weatherError.asStateFlow()
+
+    private val _packingError = MutableStateFlow(false)
+    val packingError: StateFlow<Boolean> = _packingError.asStateFlow()
+
+    /** 已勾选的行李项 */
+    private val _checkedItems = MutableStateFlow<Set<String>>(emptySet())
+    val checkedItems: StateFlow<Set<String>> = _checkedItems.asStateFlow()
 
     /** 事件：网络加载成功后通知导航 */
     private val _navigateToOverview = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
@@ -141,7 +153,7 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
         if (_isLocating.value) return
         _isLocating.value = true
         viewModelScope.launch {
-            when (val result = LocationService.getCurrentLocation(fusedLocationClient)) {
+            when (val result = LocationService.getCurrentLocation(getApplication(), fusedLocationClient)) {
                 is LocationResult.Success -> {
                     val city = LocationService.reverseGeocode(
                         getApplication(), result.lat, result.lng
@@ -149,12 +161,23 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
                     _currentCity.value = city
                 }
                 is LocationResult.Error -> {
-                    // 定位失败静默处理，不影响主流程
+                    _currentCity.value = "定位失败"
+                    _locationError.value = result.message
                 }
             }
             _isLocating.value = false
         }
     }
+
+    fun togglePackingItem(itemId: String) {
+        _checkedItems.value = _checkedItems.value.toMutableSet().apply {
+            if (contains(itemId)) remove(itemId) else add(itemId)
+        }
+    }
+
+    fun clearLocationError() { _locationError.value = null }
+    fun clearWeatherError() { _weatherError.value = false }
+    fun clearPackingError() { _packingError.value = false }
 
     /**
      * 获取当前定位城市名
@@ -165,10 +188,12 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
      * 加载天气（挂载到指定协程 scope，可随父 job 取消）
      */
     suspend fun loadWeather(tripId: String) {
+        _weatherError.value = false
         try {
             _weather.value = TripApi.fetchWeather(preferences.serverUrl, tripId)
         } catch (_: Exception) {
             _weather.value = emptyList()
+            _weatherError.value = true
         }
     }
 
@@ -176,10 +201,12 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
      * 加载行李清单（挂载到指定协程 scope，可随父 job 取消）
      */
     suspend fun loadPackingList(tripId: String) {
+        _packingError.value = false
         try {
             _packingList.value = TripApi.fetchPackingList(preferences.serverUrl, tripId)
         } catch (_: Exception) {
             _packingList.value = null
+            _packingError.value = true
         }
     }
 
@@ -194,7 +221,7 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
         _errorMessage.value = null
         _isLoading.value = false
         try {
-            _trip.value = MockTripData.sampleTrip
+            _trip.value = MockTripData.getSampleTrip(getApplication())
             viewModelScope.launch {
                 _navigateToOverview.emit(true)
             }

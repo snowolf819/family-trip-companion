@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trip.family.viewmodel.TripViewModel
 import kotlinx.coroutines.flow.SharedFlow
@@ -55,18 +54,17 @@ fun HomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("👨‍👩‍👧‍👦", fontSize = 64.sp)
+        Text("👨‍👩‍👧‍👦", style = MaterialTheme.typography.displayLarge)
         Spacer(Modifier.height(16.dp))
         Text(
             text = "家庭旅行助手",
-            fontSize = 28.sp,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = "子女为您准备的旅行行程",
-            fontSize = 18.sp,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
@@ -75,7 +73,7 @@ fun HomeScreen(
         OutlinedTextField(
             value = shareCode,
             onValueChange = { shareCode = it },
-            label = { Text("分享码", fontSize = 16.sp) },
+            label = { Text("分享码", style = MaterialTheme.typography.bodyLarge) },
             placeholder = { Text("输入子女发给您的分享码") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -85,7 +83,7 @@ fun HomeScreen(
                     viewModel.loadTripByToken(shareCode.trim())
                 }
             }),
-            textStyle = LocalTextStyle.current.copy(fontSize = 18.sp)
+            textStyle = LocalTextStyle.current
         )
 
         Spacer(Modifier.height(16.dp))
@@ -99,28 +97,28 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = MaterialTheme.shapes.large
         ) {
-            Text("查看行程", fontSize = 20.sp)
+            Text("查看行程", style = MaterialTheme.typography.titleLarge)
         }
 
         errorMessage?.let { msg ->
             Spacer(Modifier.height(16.dp))
-            Text(msg, color = MaterialTheme.colorScheme.error, fontSize = 16.sp)
+            Text(msg, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyLarge)
             Spacer(Modifier.height(8.dp))
             OutlinedButton(onClick = { viewModel.clearError() }) {
-                Text("关闭", fontSize = 16.sp)
+                Text("关闭", style = MaterialTheme.typography.bodyLarge)
             }
         }
 
         if (isLoading) {
             Spacer(Modifier.height(24.dp))
             CircularProgressIndicator()
-            Text("加载中…", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("加载中…", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
         if (hasCache && !isLoading && errorMessage == null) {
             Spacer(Modifier.height(12.dp))
             TextButton(onClick = { viewModel.loadCachedTrip() }) {
-                Text("📖 查看上次保存的行程", fontSize = 18.sp)
+                Text("📖 查看上次保存的行程", style = MaterialTheme.typography.titleMedium)
             }
         }
 
@@ -132,14 +130,14 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = MaterialTheme.shapes.large
             ) {
-                Text("🎨 预览演示（不需要服务器）", fontSize = 18.sp)
+                Text("🎨 预览演示（不需要服务器）", style = MaterialTheme.typography.titleMedium)
             }
         }
 
         Spacer(Modifier.height(32.dp))
 
         TextButton(onClick = onOpenSettings) {
-            Text("⚙️ 设置服务器地址", fontSize = 14.sp)
+            Text("⚙️ 设置服务器地址", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

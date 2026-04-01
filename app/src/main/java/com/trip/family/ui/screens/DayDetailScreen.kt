@@ -1,7 +1,5 @@
 package com.trip.family.ui.screens
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,7 +18,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trip.family.data.*
 import com.trip.family.ui.components.*
@@ -39,7 +36,7 @@ fun DayDetailScreen(
 
     if (day == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("未找到该天行程", fontSize = 20.sp)
+            Text("未找到该天行程", style = MaterialTheme.typography.titleLarge)
         }
         return
     }
@@ -50,7 +47,7 @@ fun DayDetailScreen(
                 title = {
                     Text(
                         "📅 第${day.dayNumber}天 · ${day.city}",
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -63,12 +60,7 @@ fun DayDetailScreen(
                 actions = {
                     trip?.emergencyContact?.let { contact ->
                         if (contact.phone.isNotBlank()) {
-                            IconButton(onClick = {
-                                val intent = Intent(Intent.ACTION_DIAL).apply {
-                                    data = Uri.parse("tel:${contact.phone}")
-                                }
-                                context.startActivity(intent)
-                            }) {
+                            IconButton(onClick = { context.dialPhone(contact.phone) }) {
                                 Icon(Icons.Default.Phone, contentDescription = "呼叫", tint = Color(0xFFE53935))
                             }
                         }
@@ -95,7 +87,7 @@ fun DayDetailScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("${day.date} · ${day.city}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text("${day.date} · ${day.city}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(8.dp))
                         SummaryList(summary = day.summary)
                     }
@@ -125,6 +117,6 @@ fun DayDetailScreen(
 @Composable
 private fun SummaryList(summary: List<String>) {
     for (item in summary) {
-        Text("• $item", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("• $item", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

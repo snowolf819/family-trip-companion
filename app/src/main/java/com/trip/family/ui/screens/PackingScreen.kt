@@ -1,6 +1,5 @@
 package com.trip.family.ui.screens
 
-import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,25 +10,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trip.family.data.PackingCategory
 import com.trip.family.data.PackingItem
 import com.trip.family.viewmodel.TripViewModel
-
-private fun getChecked(context: Context, itemId: String): Boolean {
-    return context.getSharedPreferences("packing", Context.MODE_PRIVATE)
-        .getBoolean("packing_checked_$itemId", false)
-}
-
-private fun setChecked(context: Context, itemId: String, checked: Boolean) {
-    context.getSharedPreferences("packing", Context.MODE_PRIVATE)
-        .edit().putBoolean("packing_checked_$itemId", checked).apply()
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,12 +25,13 @@ fun PackingScreen(
     onBack: () -> Unit = {}
 ) {
     val packingList by viewModel.packingList.collectAsState()
-    val context = LocalContext.current
+    val packingError by viewModel.packingError.collectAsState()
+    val checkedItems by viewModel.checkedItems.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("🧳 行李清单", fontSize = 20.sp) },
+                title = { Text("🧳 行李清单", style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
@@ -52,38 +40,53 @@ fun PackingScreen(
             )
         }
     ) { padding ->
-        val list = packingList
-        if (list == null) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("暂无数据", fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (list.weatherNote.isNotBlank()) {
-                    item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                            )
-                        ) {
-                            Text(
-                                "💡 ${list.weatherNote}",
-                                fontSize = 18.sp,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
+        if (packingError) {
+            Box(Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("行李清单加载失败", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                    Spacer(Modifier.height(12.dp))
+                    Button(onClick = {
+                        viewModel.clearPackingError()
+                        viewModel.refreshTrip()
+                    }) {
+                        Text("重试")
                     }
                 }
-                items(list.categories, key = { it.name }) { category ->
-                    PackingCategoryCard(category, context)
+            }
+        } else {
+            val list = packingList
+            if (list == null) {
+                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    Text("暂无数据", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                item { Spacer(Modifier.height(24.dp)) }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+                    contentPadding = PaddingValues(vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    if (list.weatherNote.isNotBlank()) {
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                                )
+                            ) {
+                                Text(
+                                    "💡 ${list.weatherNote}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                        }
+                    }
+                    items(list.categories, key = { it.name }) { category ->
+                        PackingCategoryCard(category, viewModel, checkedItems)
+                    }
+                    item { Spacer(Modifier.height(24.dp)) }
+                }
             }
         }
     }
@@ -92,7 +95,8 @@ fun PackingScreen(
 @Composable
 private fun PackingCategoryCard(
     category: PackingCategory,
-    context: Context
+    viewModel: TripViewModel,
+    checkedItems: Set<String>
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -100,10 +104,10 @@ private fun PackingCategoryCard(
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(category.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(category.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             category.items.forEach { item ->
-                val isChecked = remember { mutableStateOf(getChecked(context, item.id)) }
+                val isChecked = item.id in checkedItems
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -111,11 +115,8 @@ private fun PackingCategoryCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
-                        checked = isChecked.value,
-                        onCheckedChange = { checked ->
-                            isChecked.value = checked
-                            setChecked(context, item.id, checked)
-                        },
+                        checked = isChecked,
+                        onCheckedChange = { viewModel.togglePackingItem(item.id) },
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(Modifier.width(4.dp))
@@ -125,12 +126,12 @@ private fun PackingCategoryCard(
                             append(item.name)
                             item.condition?.let { append("（$it）") }
                         },
-                        fontSize = 18.sp,
-                        color = if (isChecked.value)
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (isChecked)
                             MaterialTheme.colorScheme.onSurfaceVariant
                         else
                             MaterialTheme.colorScheme.onSurface,
-                        textDecoration = if (isChecked.value) TextDecoration.LineThrough else null
+                        textDecoration = if (isChecked) TextDecoration.LineThrough else null
                     )
                 }
             }

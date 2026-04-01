@@ -1,5 +1,6 @@
 package com.trip.family.ui.components
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.*
@@ -12,8 +13,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.trip.family.data.*
+
+fun Context.dialPhone(phone: String) {
+    startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")))
+}
 
 /**
  * 应急联系人卡片 — 使用 errorContainer 语义颜色
@@ -30,32 +34,27 @@ fun EmergencyContactCard(contact: EmergencyContact) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 "📞 应急联系人",
-                fontSize = 20.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
             Spacer(Modifier.height(8.dp))
             Text(
                 "${contact.name}：${contact.phone}",
-                fontSize = 20.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Medium
             )
             Spacer(Modifier.height(12.dp))
             val context = LocalContext.current
             Button(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = Uri.parse("tel:${contact.phone}")
-                    }
-                    context.startActivity(intent)
-                },
+                onClick = { context.dialPhone(contact.phone) },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("📞 一键呼叫 ${contact.name}", fontSize = 18.sp)
+                Text("📞 一键呼叫 ${contact.name}", style = MaterialTheme.typography.titleMedium)
             }
         }
     }
@@ -74,32 +73,32 @@ fun EmergencyPlanCard(plan: EmergencyPlan) {
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("🆘 应急方案", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text("🆘 应急方案", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
 
             if (plan.weather.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
-                Text("🌦️ 天气突变", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                Text("🌦️ 天气突变", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
                 plan.weather.forEach { option ->
-                    Text("  • ${option.detail}", fontSize = 16.sp)
+                    Text("  • ${option.detail}", style = MaterialTheme.typography.bodyLarge)
                     option.tips?.forEach { tip ->
-                        Text("    💡 $tip", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("    💡 $tip", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
 
             if (plan.health.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
-                Text("🏥 身体不适", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                Text("🏥 身体不适", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
                 plan.health.forEach { option ->
-                    Text("  • ${option.detail}", fontSize = 16.sp)
+                    Text("  • ${option.detail}", style = MaterialTheme.typography.bodyLarge)
                 }
             }
 
             if (plan.transportDelay.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
-                Text("🚄 交通延误", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                Text("🚄 交通延误", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
                 plan.transportDelay.forEach { option ->
-                    Text("  • ${option.detail}", fontSize = 16.sp)
+                    Text("  • ${option.detail}", style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -119,14 +118,14 @@ fun SegmentCard(segment: TripSegment) {
         Column(modifier = Modifier.padding(16.dp)) {
             // 标题
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(segmentIcon(segment.type), fontSize = 24.sp)
+                Text(segmentIcon(segment.type), style = MaterialTheme.typography.headlineSmall)
                 Spacer(Modifier.width(8.dp))
-                Text(segment.title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(segment.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             }
 
             segment.subtitle?.let {
                 Spacer(Modifier.height(4.dp))
-                Text(it, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(it, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             // 交通信息
@@ -138,19 +137,19 @@ fun SegmentCard(segment: TripSegment) {
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        Text("🚄 交通", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        Text("🚄 交通", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
                         if (transport.departureTime != null) {
-                            Text("  🕐 ${transport.departureTime}", fontSize = 16.sp)
+                            Text("  🕐 ${transport.departureTime}", style = MaterialTheme.typography.bodyLarge)
                         }
                         if (!transport.departureStation.isNullOrBlank() || !transport.arrivalStation.isNullOrBlank()) {
-                            Text("  📍 ${transport.departureStation ?: ""} → ${transport.arrivalStation ?: ""}", fontSize = 16.sp)
+                            Text("  📍 ${transport.departureStation ?: ""} → ${transport.arrivalStation ?: ""}", style = MaterialTheme.typography.bodyLarge)
                         }
-                        Text("  🚌 方式：${transport.mode}", fontSize = 16.sp)
+                        Text("  🚌 方式：${transport.mode}", style = MaterialTheme.typography.bodyLarge)
                         transport.durationMinutes?.let {
-                            Text("  ⏱️ 约${it}分钟", fontSize = 16.sp)
+                            Text("  ⏱️ 约${it}分钟", style = MaterialTheme.typography.bodyLarge)
                         }
                         transport.pricePerPerson?.let {
-                            Text("  💰 ${it}元/人", fontSize = 16.sp)
+                            Text("  💰 ${it}元/人", style = MaterialTheme.typography.bodyLarge)
                         }
                     }
                 }
@@ -165,29 +164,29 @@ fun SegmentCard(segment: TripSegment) {
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        Text("🚇 公共交通参考", fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                        Text("  ${route.from} → ${route.to}", fontSize = 16.sp)
-                        Text("  ${route.mode}，约${route.durationMinutes}分钟", fontSize = 16.sp)
-                        Text("  📋 ${route.route}", fontSize = 16.sp)
+                        Text("🚇 公共交通参考", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                        Text("  ${route.from} → ${route.to}", style = MaterialTheme.typography.bodyLarge)
+                        Text("  ${route.mode}，约${route.durationMinutes}分钟", style = MaterialTheme.typography.bodyLarge)
+                        Text("  📋 ${route.route}", style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }
 
             segment.route?.let {
                 Spacer(Modifier.height(4.dp))
-                Text("🗺️ 路线：$it", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("🗺️ 路线：$it", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             segment.mealRecommendation?.let {
                 Spacer(Modifier.height(4.dp))
-                Text("🍜 $it", fontSize = 16.sp)
+                Text("🍜 $it", style = MaterialTheme.typography.bodyLarge)
             }
 
             segment.highlights?.let { highlights ->
                 if (highlights.isNotEmpty()) {
                     Spacer(Modifier.height(4.dp))
                     highlights.forEach { h ->
-                        Text("⭐ $h", fontSize = 16.sp)
+                        Text("⭐ $h", style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }
@@ -200,7 +199,7 @@ fun SegmentCard(segment: TripSegment) {
                     color = MaterialTheme.colorScheme.secondaryContainer,
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("👴 老年人建议：$it", fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+                    Text("👴 老年人建议：$it", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(8.dp))
                 }
             }
 
@@ -215,7 +214,7 @@ fun SegmentCard(segment: TripSegment) {
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
                             cautions.forEach { c ->
-                                Text("⚠️ $c", fontSize = 16.sp, color = MaterialTheme.colorScheme.onErrorContainer)
+                                Text("⚠️ $c", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onErrorContainer)
                             }
                         }
                     }
@@ -224,7 +223,7 @@ fun SegmentCard(segment: TripSegment) {
 
             segment.notes?.let {
                 Spacer(Modifier.height(4.dp))
-                Text(it, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(it, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -246,33 +245,30 @@ fun HotelInfoCard(hotel: HotelCard) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("🏨", fontSize = 28.sp)
+                Text("🏨", style = MaterialTheme.typography.headlineMedium)
                 Spacer(Modifier.width(8.dp))
-                Text(hotel.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(hotel.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.height(4.dp))
-            Text("★${hotel.stars} · 评分 ${hotel.score}/5.0", fontSize = 16.sp)
-            Text("📍 ${hotel.address}", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("★${hotel.stars} · 评分 ${hotel.score}/5.0", style = MaterialTheme.typography.bodyLarge)
+            Text("📍 ${hotel.address}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
             Spacer(Modifier.height(8.dp))
-            Text("🚇 距车站 ${hotel.stationDistanceKm}km，打车约${hotel.taxiPrice}元", fontSize = 16.sp)
-            Text("🚶 距公交站 ${hotel.busStopMeters}米（${hotel.busLines.joinToString("、")}）", fontSize = 16.sp)
-            Text("🍜 500米内餐厅${hotel.restaurantsNearby}家，便利店${hotel.storesNearby}家", fontSize = 16.sp)
+            Text("🚇 距车站 ${hotel.stationDistanceKm}km，打车约${hotel.taxiPrice}元", style = MaterialTheme.typography.bodyLarge)
+            Text("🚶 距公交站 ${hotel.busStopMeters}米（${hotel.busLines.joinToString("、")}）", style = MaterialTheme.typography.bodyLarge)
+            Text("🍜 500米内餐厅${hotel.restaurantsNearby}家，便利店${hotel.storesNearby}家", style = MaterialTheme.typography.bodyLarge)
 
             Spacer(Modifier.height(4.dp))
-            Text("💰 ${hotel.priceMin} - ${hotel.priceMax}元/晚", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+            Text("💰 ${hotel.priceMin} - ${hotel.priceMax}元/晚", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
 
             if (hotel.phone.isNotBlank()) {
                 Spacer(Modifier.height(8.dp))
                 Button(
-                    onClick = {
-                        val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${hotel.phone}"))
-                        context.startActivity(dialIntent)
-                    },
+                    onClick = { context.dialPhone(hotel.phone) },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("📞 拨打酒店电话", fontSize = 18.sp)
+                    Text("📞 拨打酒店电话", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

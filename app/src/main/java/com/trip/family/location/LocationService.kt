@@ -33,8 +33,10 @@ object LocationService {
      * 需要已在 UI 层获取了权限
      */
     suspend fun getCurrentLocation(
+        context: Context,
         client: FusedLocationProviderClient
     ): LocationResult {
+        if (!hasLocationPermission(context)) return LocationResult.Error("无定位权限")
         return suspendCancellableCoroutine { cont ->
             val cts = CancellationTokenSource()
             cont.invokeOnCancellation { cts.cancel() }
