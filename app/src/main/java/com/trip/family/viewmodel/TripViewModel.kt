@@ -104,4 +104,15 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
     fun clearError() {
         _errorMessage.value = null
     }
+
+    /**
+     * 加载模拟数据（预览用，不依赖后端）
+     */
+    fun loadMockTrip() {
+        val mock = com.trip.family.data.MockTripData.sampleTrip
+        _trip.value = mock
+        viewModelScope.launch {
+            _navigateToOverview.emit(true)
+        }
+    }
 }

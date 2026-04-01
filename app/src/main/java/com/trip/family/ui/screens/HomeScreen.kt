@@ -115,9 +115,21 @@ fun HomeScreen(
         }
 
         if (hasCache && !isLoading && errorMessage == null) {
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(12.dp))
             TextButton(onClick = { viewModel.loadCachedTrip() }) {
                 Text("📖 查看上次保存的行程", fontSize = 18.sp)
+            }
+        }
+
+        // 预览演示按钮（不需要后端）
+        if (!isLoading && errorMessage == null) {
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = { viewModel.loadMockTrip() },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = MaterialTheme.shapes.large
+            ) {
+                Text("🎨 预览演示（不需要服务器）", fontSize = 18.sp)
             }
         }
 
