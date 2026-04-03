@@ -118,7 +118,11 @@ fun HomeScreen(
         if (hasCache && !isLoading && errorMessage == null) {
             Spacer(Modifier.height(12.dp))
             TextButton(onClick = { viewModel.loadCachedTrip() }) {
-                Text("📖 查看上次保存的行程", style = MaterialTheme.typography.titleMedium)
+                val prefs = com.trip.family.TripPreferences(LocalContext.current)
+                val ageLabel = prefs.cacheAgeFormatted
+                val expired = prefs.isCacheExpired
+                val suffix = if (ageLabel.isNotEmpty()) "（${ageLabel}${if (expired) " · 已过期" else ""}）" else ""
+                Text("📖 查看上次保存的行程$suffix", style = MaterialTheme.typography.titleMedium)
             }
         }
 
@@ -151,12 +155,12 @@ fun extractShareToken(intent: android.content.Intent?): String? {
 
     // https://plan.and.im/share/xxxxx
     if (data.scheme == "https" && data.host == "plan.and.im" && data.pathSegments.size >= 2) {
-        return data.pathSegments[1]
+        return data.pathSegments[1].trim().ifBlank { null }
     }
 
     // tripfamily://share/xxxxx
     if (data.scheme == "tripfamily" && data.host == "share") {
-        return data.pathSegments.firstOrNull()
+        return data.pathSegments.firstOrNull()?.trim()?.ifBlank { null }
     }
 
     return null

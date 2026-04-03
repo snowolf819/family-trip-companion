@@ -21,7 +21,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val fontScaleOptions = listOf(
-    0.8f to "小",
     1.0f to "标准",
     1.2f to "大",
     1.4f to "超大"
@@ -96,7 +95,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("小", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("标准", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Slider(
                     value = currentScale,
                     onValueChange = { newValue ->
@@ -104,7 +103,7 @@ fun SettingsScreen(
                         fontScaleState?.floatValue = snapped
                         prefs?.fontScale = snapped
                     },
-                    valueRange = 0.8f..1.4f,
+                    valueRange = 1.0f..1.4f,
                     steps = 2,
                     modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
                 )

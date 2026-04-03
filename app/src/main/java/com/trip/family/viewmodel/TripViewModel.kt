@@ -82,7 +82,12 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
      * 通过分享 token 加载行程（深度链接入口）
      * 只有网络加载成功才触发导航，缓存加载不触发
      */
-    fun loadTripByToken(token: String) {
+    fun loadTripByToken(rawToken: String) {
+        val token = rawToken.trim()
+        if (token.isBlank()) {
+            _errorMessage.value = "分享码不能为空"
+            return
+        }
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             _isLoading.value = true
@@ -116,7 +121,7 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
      * 刷新当前行程
      */
     fun refreshTrip() {
-        val token = preferences.lastShareToken
+        val token = preferences.lastShareToken.trim()
         if (token.isNotBlank()) {
             loadTripByToken(token)
         }
