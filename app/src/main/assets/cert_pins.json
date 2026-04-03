@@ -1,0 +1,7 @@
+{
+  "_comment": "证书固定配置。每个域名对应一组 SHA-256 指纹（主证书 + 备用）。指纹获取命令见 README。",
+  "plan.and.im": [
+    "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "sha256/BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
+  ]
+}

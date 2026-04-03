@@ -1,5 +1,6 @@
 package com.trip.family.api
 
+import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.trip.family.data.PackingListResponse
@@ -23,34 +24,54 @@ object TripApi {
 
     private val gson = Gson()
 
-    // 默认域名的证书 SHA-256 pin（主证书 + 备用证书）
-    // 当证书轮换时需更新此列表
-    private val PINNED_DOMAINS = mapOf(
-        "plan.and.im" to setOf(
-            "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",  // TODO: 替换为真实证书指纹
-            "sha256/BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=",  // 备用
-        )
-    )
+    // 从 assets/cert_pins.json 加载，按域名 → SHA-256 指纹集合
+    private var pinnedDomains: Map<String, Set<String>> = emptyMap()
+
+    /** Application.onCreate() 中调用一次 */
+    fun init(context: Context) {
+        pinnedDomains = loadCertPins(context)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun loadCertPins(context: Context): Map<String, Set<String>> {
+        return try {
+            val json = context.assets.open("cert_pins.json").bufferedReader().readText()
+            val raw = gson.fromJson(json, Map::class.java) as Map<String, Any>
+            raw.filter { !it.key.startsWith("_") }
+                .mapValues { (_, v) ->
+                    when (v) {
+                        is List<*> -> v.filterIsInstance<String>().toSet()
+                        else -> emptySet()
+                    }
+                }
+        } catch (_: Exception) {
+            emptyMap()
+        }
+    }
 
     private fun sha256(bytes: ByteArray): String {
         val md = MessageDigest.getInstance("SHA-256")
         return "sha256/" + android.util.Base64.encodeToString(md.digest(bytes), android.util.Base64.NO_WRAP)
     }
 
+    private fun getDefaultTrustManager(): X509TrustManager {
+        val factory = javax.net.ssl.TrustManagerFactory.getInstance(
+            javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm()
+        )
+        factory.init(null as java.security.KeyStore?)
+        return factory.trustManagers.first { it is X509TrustManager } as X509TrustManager
+    }
+
     private fun createPinnedTrustManager(pins: Set<String>): X509TrustManager {
         return object : X509TrustManager {
             @Throws(CertificateException::class)
-            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {
-                // 客户端证书不校验
-            }
+            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
 
             @Throws(CertificateException::class)
             override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {
-                // 先做标准链校验（证书是否由受信 CA 签发）
                 val defaultTrustManager = getDefaultTrustManager()
                 defaultTrustManager.checkServerTrusted(chain, authType)
 
-                // 再校验证书指纹
                 val serverPin = sha256(chain[0].encoded)
                 if (!pins.contains(serverPin)) {
                     throw CertificateException("证书指纹不匹配: $serverPin")
@@ -60,14 +81,6 @@ object TripApi {
             override fun getAcceptedIssuers(): Array<X509Certificate> =
                 getDefaultTrustManager().acceptedIssuers
         }
-    }
-
-    private fun getDefaultTrustManager(): X509TrustManager {
-        val factory = javax.net.ssl.TrustManagerFactory.getInstance(
-            javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm()
-        )
-        factory.init(null as java.security.KeyStore?)
-        return factory.trustManagers.first { it is X509TrustManager } as X509TrustManager
     }
 
     private fun validateBaseUrl(baseUrl: String) {
@@ -94,16 +107,17 @@ object TripApi {
         val parsedUrl = URL(url)
         val connection = parsedUrl.openConnection()
 
-        // 证书固定：对已知域名启用
+        // 证书固定：对 cert_pins.json 中配置的域名启用
         if (connection is HttpsURLConnection) {
             val host = parsedUrl.host
-            val pins = PINNED_DOMAINS[host]
-            if (pins != null) {
+            val pins = pinnedDomains[host]
+            if (pins != null && pins.isNotEmpty()) {
                 val trustManager = createPinnedTrustManager(pins)
                 val sslContext = SSLContext.getInstance("TLS")
                 sslContext.init(null, arrayOf<TrustManager>(trustManager), null)
                 connection.sslSocketFactory = sslContext.socketFactory
             }
+            // pins 为空或域名不在列表中 → 使用系统默认证书校验
         }
 
         if (connection is HttpURLConnection) {
