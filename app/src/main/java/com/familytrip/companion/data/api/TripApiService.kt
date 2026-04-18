@@ -7,7 +7,7 @@ import retrofit2.http.Path
 
 interface TripApiService {
     @GET("api/trips/share/{token}")
-    suspend fun getTripByToken(@Path("token") token: String): Trip
+    suspend fun getTripByShareToken(@Path("token") token: String): Trip
 
     @GET("api/trips/{tripId}/packing")
     suspend fun getPackingList(@Path("tripId") tripId: String): PackingList

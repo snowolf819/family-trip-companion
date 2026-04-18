@@ -1,25 +1,36 @@
 package com.familytrip.companion.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-
-private val DarkColorScheme = darkColorScheme(primary = Purple80, secondary = PurpleGrey80, tertiary = Pink80)
-private val LightColorScheme = lightColorScheme(primary = Purple40, secondary = PurpleGrey40, tertiary = Pink40)
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import com.familytrip.companion.data.local.PreferencesManager
 
 @Composable
-fun FamilyTripCompanionTheme(darkMode: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colorScheme = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && darkMode -> dynamicDarkColorScheme(LocalContext.current)
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !darkMode -> dynamicLightColorScheme(LocalContext.current)
-        darkMode -> DarkColorScheme
-        else -> LightColorScheme
+fun FamilyTripCompanionTheme(
+    prefsManager: PreferencesManager? = null,
+    content: @Composable () -> Unit
+) {
+    val darkMode by prefsManager?.darkMode?.collectAsState(initial = false) ?: remember { mutableStateOf(false) }
+
+    val colorScheme = if (darkMode == true || isSystemInDarkTheme()) {
+        darkColorScheme(primary = Primary, secondary = Secondary)
+    } else {
+        lightColorScheme(
+            primary = Primary, onPrimary = OnPrimary,
+            secondary = Secondary, onSecondary = OnSecondary,
+            background = Background, onBackground = OnBackground,
+            surface = Surface, onSurface = OnSurface,
+            error = Error
+        )
     }
-    MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = FamilyTripTypography,
+        content = content
+    )
 }

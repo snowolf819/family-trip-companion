@@ -1,47 +1,18 @@
 package com.familytrip.companion.ui.home
 
-import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.familytrip.companion.R
-import com.familytrip.companion.data.model.HistoryItem
+import com.familytrip.companion.viewmodel.TripUiState
 import com.familytrip.companion.viewmodel.TripViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,79 +22,122 @@ fun HomeScreen(
     onNavigateToTrip: () -> Unit,
     onNavigateToSettings: () -> Unit
 ) {
-    val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
     var tokenInput by remember { mutableStateOf("") }
-    val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
-    val history by viewModel.history.collectAsState()
-    val trip by viewModel.currentTrip.collectAsState()
-
-    LaunchedEffect(error) { error?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() } }
-    LaunchedEffect(trip) { if (trip != null) onNavigateToTrip() }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
+                title = { Text("旅行助手", style = MaterialTheme.typography.headlineMedium) },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
+                        Icon(Icons.Default.Settings, contentDescription = "设置")
                     }
                 }
             )
         }
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                "输入子女分享的行程码",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
             OutlinedTextField(
                 value = tokenInput,
-                onValueChange = { tokenInput = it },
-                label = { Text(stringResource(R.string.token_hint)) },
+                onValueChange = { input ->
+                    // Auto-extract token from URL
+                    tokenInput = if (input.contains("/parent/")) {
+                        input.substringAfter("/parent/").substringBefore("?").substringBefore("#").trim()
+                    } else {
+                        input.trim()
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                placeholder = { Text("粘贴行程码或分享链接") },
+                shape = RoundedCornerShape(12.dp),
                 minLines = 2,
                 textStyle = MaterialTheme.typography.bodyLarge
             )
-            Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 onClick = {
-                    val token = viewModel.extractToken(tokenInput)
-                    if (token.isNotBlank()) viewModel.loadTrip(token)
-                    else Toast.makeText(context, "请输入行程码", Toast.LENGTH_SHORT).show()
+                    if (tokenInput.isNotBlank()) {
+                        viewModel.loadTrip(tokenInput)
+                        onNavigateToTrip()
+                    }
                 },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(16.dp)
+                modifier = Modifier.fillMaxWidth().height(64.dp),
+                shape = RoundedCornerShape(16.dp),
+                enabled = tokenInput.isNotBlank()
             ) {
-                if (isLoading) CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
-                else Text(stringResource(R.string.view_trip), style = MaterialTheme.typography.titleMedium)
+                Text("查看行程", style = MaterialTheme.typography.titleMedium)
             }
-            Spacer(modifier = Modifier.height(32.dp))
-            if (history.isNotEmpty()) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.History, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.history_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+
+            if (uiState.error != null) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        uiState.error ?: "",
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(history) { item ->
-                        HistoryCard(item = item, onClick = { tokenInput = item.token; viewModel.loadTrip(item.token) })
+            }
+
+            if (uiState.isLoading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+
+            // History
+            if (uiState.history.isNotEmpty()) {
+                HorizontalDivider()
+                Text(
+                    "最近查看",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(uiState.history) { item ->
+                        Card(
+                            onClick = {
+                                tokenInput = item.token
+                                viewModel.loadTrip(item.token)
+                                onNavigateToTrip()
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.History,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(item.title, style = MaterialTheme.typography.bodyLarge)
+                                    Text(
+                                        item.dateRange,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun HistoryCard(item: HistoryItem, onClick: () -> Unit) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(item.title, style = MaterialTheme.typography.titleMedium)
-            Text("行程码: ${item.token}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
