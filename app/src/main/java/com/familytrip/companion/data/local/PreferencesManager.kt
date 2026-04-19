@@ -19,11 +19,10 @@ class PreferencesManager(private val context: Context) {
         private val KEY_FONT_SCALE = floatPreferencesKey("font_scale")
         private val KEY_DARK_MODE = booleanPreferencesKey("dark_mode")
         private val KEY_HISTORY = stringPreferencesKey("trip_history")
-        private val DEFAULT_BASE_URL = "http://192.168.1.100:3000"
         private val json = Json { ignoreUnknownKeys = true }
     }
 
-    val baseUrl: Flow<String> = context.dataStore.data.map { it[KEY_BASE_URL] ?: DEFAULT_BASE_URL }
+    val baseUrl: Flow<String> = context.dataStore.data.map { it[KEY_BASE_URL] ?: "" }
 
     val fontScale: Flow<Float> = context.dataStore.data.map { it[KEY_FONT_SCALE] ?: 1.0f }
 

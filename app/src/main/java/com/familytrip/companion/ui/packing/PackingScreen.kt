@@ -39,7 +39,8 @@ fun PackingScreen(
             )
         }
     ) { padding ->
-        if (packingList == null) {
+        // P1-5: loading state
+        if (uiState.isPackingLoading) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator()
@@ -50,12 +51,30 @@ fun PackingScreen(
             return@Scaffold
         }
 
+        // P1-5: error state
+        if (uiState.packingError != null) {
+            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(Icons.Default.ErrorOutline, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.error)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(uiState.packingError!!, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
+                }
+            }
+            return@Scaffold
+        }
+
+        if (packingList == null) {
+            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Text("暂无行李清单", style = MaterialTheme.typography.bodyLarge)
+            }
+            return@Scaffold
+        }
+
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Weather note
             if (packingList.weatherNote.isNotBlank()) {
                 item {
                     Card(
@@ -71,12 +90,10 @@ fun PackingScreen(
                 }
             }
 
-            // Categories
             items(packingList.categories) { category ->
                 PackingCategorySection(category, checkedItems)
             }
 
-            // Summary
             item {
                 val total = packingList.categories.sumOf { it.items.size }
                 val checked = packingList.categories.sumOf { cat ->

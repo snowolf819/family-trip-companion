@@ -32,6 +32,13 @@ fun TripOverviewScreen(
     val trip = uiState.trip
     val context = LocalContext.current
 
+    // P1-11: trip==null auto navigate back
+    LaunchedEffect(trip) {
+        if (trip == null && !uiState.isLoading) {
+            onBack()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -46,7 +53,7 @@ fun TripOverviewScreen(
     ) { padding ->
         if (trip == null) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("暂无行程数据", style = MaterialTheme.typography.bodyLarge)
+                if (uiState.isLoading) CircularProgressIndicator() else Text("暂无行程数据", style = MaterialTheme.typography.bodyLarge)
             }
             return@Scaffold
         }
@@ -56,33 +63,30 @@ fun TripOverviewScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Date range & cities
-            item {
-                OverviewHeader(trip)
-            }
+            item { OverviewHeader(trip) }
 
-            // Emergency contact
             if (trip.emergencyContact.phone.isNotBlank()) {
-                item {
-                    EmergencyContactCard(trip)
-                }
+                item { EmergencyContactCard(trip) }
             }
 
-            // Day list
             item {
-                Text(
-                    "行程安排",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
+                Text("行程安排", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            itemsIndexed(trip.days) { index, day ->
-                DayCard(day = day, dayIndex = index, onClick = { onNavigateToDay(index) })
+            // P2-16: empty days hint
+            if (trip.days.isEmpty()) {
+                item {
+                    Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Text("暂无行程安排", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            } else {
+                itemsIndexed(trip.days) { index, day ->
+                    DayCard(day = day, dayIndex = index, onClick = { onNavigateToDay(index) })
+                }
             }
 
-            // Packing button
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
@@ -98,7 +102,6 @@ fun TripOverviewScreen(
                     Text("查看行李清单", style = MaterialTheme.typography.titleMedium)
                 }
             }
-
             item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
@@ -111,7 +114,7 @@ private fun OverviewHeader(trip: Trip) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(trip.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(trip.title.ifBlank { "未命名行程" }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -139,6 +142,25 @@ private fun OverviewHeader(trip: Trip) {
 private fun EmergencyContactCard(trip: Trip) {
     val context = LocalContext.current
     val contact = trip.emergencyContact
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("拨打电话") },
+            text = { Text("确定拨打 ${contact.name} 的电话 ${contact.phone} 吗？") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${contact.phone}"))
+                    context.startActivity(intent)
+                }) { Text("拨打") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) { Text("取消") }
+            }
+        )
+    }
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -154,10 +176,7 @@ private fun EmergencyContactCard(trip: Trip) {
                 Text("${contact.name}  ${contact.phone}", style = MaterialTheme.typography.bodyLarge)
             }
             FilledIconButton(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${contact.phone}"))
-                    context.startActivity(intent)
-                },
+                onClick = { showDialog = true },
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(Icons.Default.Phone, contentDescription = "拨号", modifier = Modifier.size(28.dp))
@@ -185,7 +204,7 @@ private fun DayCard(day: TripDay, dayIndex: Int, onClick: () -> Unit) {
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(day.city, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(day.city.ifBlank { "未指定城市" }, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(day.date, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (day.summary.isNotEmpty()) {
                     Text(

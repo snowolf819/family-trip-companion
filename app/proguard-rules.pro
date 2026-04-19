@@ -1,18 +1,18 @@
-# Retrofit
--dontwarn retrofit2.**
--keep class retrofit2.** { *; }
--keepattributes Signature
--keepattributes Exceptions
+# kotlinx-serialization
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
 
-# Moshi
--keep class com.squareup.moshi.** { *; }
--keepclassmembers class * {
-    @com.squareup.moshi.Json <fields>;
+-keepclassmembers class kotlinx.serialization.json.** {
+    *** Companion;
+}
+-keepclasseswithmembers class kotlinx.serialization.json.** {
+    kotlinx.serialization.KSerializer serializer(...);
 }
 
-# OkHttp
--dontwarn okhttp3.**
--keep class okhttp3.** { *; }
-
-# Data classes
--keep class com.familytrip.companion.data.model.** { *; }
+-keep,includedescriptorclasses class com.familytrip.companion.data.model.**$$serializer { *; }
+-keepclassmembers class com.familytrip.companion.data.model.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.familytrip.companion.data.model.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}

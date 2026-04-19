@@ -20,10 +20,19 @@ import com.familytrip.companion.viewmodel.TripViewModel
 fun HomeScreen(
     viewModel: TripViewModel,
     onNavigateToTrip: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    deepLinkToken: String? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var tokenInput by remember { mutableStateOf("") }
+
+    LaunchedEffect(deepLinkToken) {
+        if (!deepLinkToken.isNullOrBlank() && tokenInput.isBlank()) {
+            tokenInput = deepLinkToken
+            viewModel.loadTrip(deepLinkToken)
+            onNavigateToTrip()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -50,7 +59,6 @@ fun HomeScreen(
             OutlinedTextField(
                 value = tokenInput,
                 onValueChange = { input ->
-                    // Auto-extract token from URL
                     tokenInput = if (input.contains("/parent/")) {
                         input.substringAfter("/parent/").substringBefore("?").substringBefore("#").trim()
                     } else {
@@ -126,7 +134,10 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
-                                    Text(item.title, style = MaterialTheme.typography.bodyLarge)
+                                    Text(
+                                        item.title.ifBlank { "未命名行程" },
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
                                     Text(
                                         item.dateRange,
                                         style = MaterialTheme.typography.bodySmall,
@@ -136,6 +147,17 @@ fun HomeScreen(
                             }
                         }
                     }
+                }
+
+                // P2-15: Clear history button
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = { viewModel.clearHistory() },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("清除历史记录")
                 }
             }
         }

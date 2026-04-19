@@ -19,6 +19,7 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var baseUrlInput by remember(uiState.baseUrl) { mutableStateOf(uiState.baseUrl) }
+    var urlError by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -40,14 +41,31 @@ fun SettingsScreen(
             Text("服务器地址", style = MaterialTheme.typography.titleMedium)
             OutlinedTextField(
                 value = baseUrlInput,
-                onValueChange = { baseUrlInput = it },
+                onValueChange = { baseUrlInput = it; urlError = null },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("http://192.168.1.100:3000") },
+                placeholder = { Text("https://your-server.com") },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                isError = urlError != null,
+                supportingText = urlError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
             )
+            if (baseUrlInput.startsWith("http://")) {
+                Text(
+                    "⚠️ 使用 HTTP 不安全，建议使用 HTTPS",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
             Button(
-                onClick = { viewModel.setBaseUrl(baseUrlInput) },
+                onClick = {
+                    val trimmed = baseUrlInput.trim()
+                    if (trimmed.isNotEmpty() && !trimmed.matches(Regex("^https?://.+"))) {
+                        urlError = "地址必须以 http:// 或 https:// 开头"
+                    } else {
+                        urlError = null
+                        viewModel.setBaseUrl(trimmed)
+                    }
+                },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {

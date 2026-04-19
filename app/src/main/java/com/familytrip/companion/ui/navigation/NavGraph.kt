@@ -1,7 +1,7 @@
 package com.familytrip.companion.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -17,7 +17,7 @@ import com.familytrip.companion.viewmodel.SettingsViewModel
 import com.familytrip.companion.viewmodel.TripViewModel
 
 @Composable
-fun NavGraph() {
+fun NavGraph(deepLinkToken: String? = null) {
     val navController = rememberNavController()
     val tripVm: TripViewModel = viewModel()
     val settingsVm: SettingsViewModel = viewModel()
@@ -27,7 +27,8 @@ fun NavGraph() {
             HomeScreen(
                 viewModel = tripVm,
                 onNavigateToTrip = { navController.navigate("trip") },
-                onNavigateToSettings = { navController.navigate("settings") }
+                onNavigateToSettings = { navController.navigate("settings") },
+                deepLinkToken = deepLinkToken
             )
         }
         composable("trip") {
