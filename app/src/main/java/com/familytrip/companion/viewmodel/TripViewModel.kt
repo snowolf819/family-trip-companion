@@ -8,6 +8,7 @@ import com.familytrip.companion.data.local.PreferencesManager
 import com.familytrip.companion.data.model.PackingList
 import com.familytrip.companion.data.model.Trip
 import com.familytrip.companion.data.model.TripHistory
+import com.familytrip.companion.data.model.WeatherInfo
 import com.familytrip.companion.data.repository.TripRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -25,6 +26,7 @@ data class TripUiState(
     val packingList: PackingList? = null,
     val packingError: String? = null,
     val isPackingLoading: Boolean = false,
+    val weather: List<WeatherInfo> = emptyList(),
     val error: String? = null,
     val history: List<TripHistory> = emptyList()
 )
@@ -39,7 +41,6 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
 
     val baseUrl: StateFlow<String> = prefsManager.baseUrl.stateIn(viewModelScope, SharingStarted.Lazily, "")
 
-    // P1-10: cached OkHttpClient
     private var cachedClient: OkHttpClient? = null
     private var api: TripApiService? = null
     private var repo: TripRepository? = null
@@ -87,10 +88,21 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
                     val title = trip.title.ifBlank { "未命名行程" }
                     prefsManager.addHistory(TripHistory(token, title, "${trip.dateRange.start} ~ ${trip.dateRange.end}", System.currentTimeMillis()))
                     _uiState.update { it.copy(isLoading = false, trip = trip) }
+                    loadWeather(trip.tripId)
                 }
                 .onFailure { e ->
                     _uiState.update { it.copy(isLoading = false, error = friendlyError(e)) }
                 }
+        }
+    }
+
+    fun loadWeather(tripId: String) {
+        viewModelScope.launch {
+            val service = api ?: return@launch
+            try {
+                val w = service.getWeather(tripId)
+                _uiState.update { it.copy(weather = w) }
+            } catch (_: Exception) { }
         }
     }
 

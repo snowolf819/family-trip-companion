@@ -25,6 +25,7 @@ fun DayDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val day = uiState.trip?.days?.getOrNull(dayIndex)
+    val weather = day?.let { uiState.weather.find { w -> w.date == it.date } }
 
     Scaffold(
         topBar = {
@@ -60,6 +61,35 @@ fun DayDetailScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // Weather card
+            weather?.let { w ->
+                item {
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(w.icon, style = MaterialTheme.typography.headlineMedium)
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(w.textDay, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                    Text("${w.tempMin}°C ~ ${w.tempMax}°C", style = MaterialTheme.typography.bodyLarge)
+                                }
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text("${w.windDir} ${w.windScale}级", style = MaterialTheme.typography.bodyMedium)
+                                Text("湿度 ${w.humidity}%", style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                    }
+                }
             }
 
             // Segments
@@ -141,6 +171,23 @@ private fun SegmentCard(segment: TripSegment) {
                         Icon(Icons.Default.AttachMoney, contentDescription = "价格", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("¥${price.toInt()}/人", style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+
+            // Transport route (intercity route info)
+            segment.transportRoute?.let { route ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Text("🚄 城际交通: ${route.from} → ${route.to}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                        Text("方式: ${route.mode} · ${route.durationMinutes}分钟 · ¥${route.price.toInt()}", style = MaterialTheme.typography.bodyMedium)
+                        if (route.route.isNotBlank()) {
+                            Text("路线: ${route.route}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 }
             }

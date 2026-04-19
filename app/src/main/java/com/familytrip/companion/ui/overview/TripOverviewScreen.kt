@@ -32,7 +32,6 @@ fun TripOverviewScreen(
     val trip = uiState.trip
     val context = LocalContext.current
 
-    // P1-11: trip==null auto navigate back
     LaunchedEffect(trip) {
         if (trip == null && !uiState.isLoading) {
             onBack()
@@ -65,6 +64,11 @@ fun TripOverviewScreen(
         ) {
             item { OverviewHeader(trip) }
 
+            // Weather section
+            if (uiState.weather.isNotEmpty()) {
+                item { WeatherSection(uiState.weather) }
+            }
+
             if (trip.emergencyContact.phone.isNotBlank()) {
                 item { EmergencyContactCard(trip) }
             }
@@ -74,7 +78,6 @@ fun TripOverviewScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // P2-16: empty days hint
             if (trip.days.isEmpty()) {
                 item {
                     Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
@@ -83,7 +86,7 @@ fun TripOverviewScreen(
                 }
             } else {
                 itemsIndexed(trip.days) { index, day ->
-                    DayCard(day = day, dayIndex = index, onClick = { onNavigateToDay(index) })
+                    DayCard(day = day, dayIndex = index, onClick = { onNavigateToDay(index) }, weather = uiState.weather.find { it.date == day.date })
                 }
             }
 
@@ -116,6 +119,31 @@ private fun formatDate(dateStr: String): String {
         }
         "${date.monthValue}月${date.dayOfMonth}日 $dayOfWeek"
     } catch (_: Exception) { dateStr }
+}
+
+@Composable
+private fun WeatherSection(weather: List<WeatherInfo>) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("🌤 天气预报", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                weather.forEach { w ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(w.icon, style = MaterialTheme.typography.titleMedium)
+                        Text("${w.tempMin}°~${w.tempMax}°", style = MaterialTheme.typography.labelSmall)
+                        Text(w.textDay, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -197,7 +225,7 @@ private fun EmergencyContactCard(trip: Trip) {
 }
 
 @Composable
-private fun DayCard(day: TripDay, dayIndex: Int, onClick: () -> Unit) {
+private fun DayCard(day: TripDay, dayIndex: Int, onClick: () -> Unit, weather: WeatherInfo?) {
     Card(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
@@ -223,6 +251,13 @@ private fun DayCard(day: TripDay, dayIndex: Int, onClick: () -> Unit) {
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
+                    )
+                }
+                weather?.let { w ->
+                    Text(
+                        "${w.icon} ${w.tempMin}°~${w.tempMax}° ${w.textDay}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }

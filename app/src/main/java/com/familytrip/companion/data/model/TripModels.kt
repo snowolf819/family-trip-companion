@@ -30,8 +30,8 @@ data class TripDay(
     val city: String = "",
     val summary: List<String> = emptyList(),
     val segments: List<TripSegment> = emptyList(),
-    @SerialName("hotel_card") val hotelCard: HotelCard? = null,
-    @SerialName("emergency_plan") val emergencyPlan: EmergencyPlan? = null
+    @SerialName("hotelCard") val hotelCard: HotelCard? = null,
+    @SerialName("emergencyPlan") val emergencyPlan: EmergencyPlan? = null
 )
 @Serializable
 enum class SegmentType {
@@ -44,6 +44,16 @@ enum class SegmentType {
     @SerialName("transport") TRANSPORT,
     @SerialName("other") OTHER;
 }
+
+@Serializable
+data class TransportRoute(
+    val from: String = "",
+    val to: String = "",
+    val mode: String = "",
+    @SerialName("duration_minutes") val durationMinutes: Int = 0,
+    val price: Double = 0.0,
+    val route: String = ""
+)
 
 @Serializable
 data class TripSegment(
@@ -61,6 +71,7 @@ data class TripSegment(
     @SerialName("elderly_notes") val elderlyNotes: String? = null,
     val caution: List<String>? = null,
     val city: String? = null,
+    @SerialName("transportRoute") val transportRoute: TransportRoute? = null,
     @SerialName("ticket_price") val ticketPrice: Double? = null,
     @SerialName("meal_price") val mealPrice: Double? = null
 )
@@ -84,14 +95,14 @@ data class HotelCard(
     val stars: Int = 0,
     val score: Double = 0.0,
     val address: String = "",
-    @SerialName("station_distance_km") val stationDistanceKm: Double = 0.0,
-    @SerialName("taxi_price") val taxiPrice: Double = 0.0,
-    @SerialName("bus_stop_meters") val busStopMeters: Int = 0,
-    @SerialName("bus_lines") val busLines: List<String> = emptyList(),
-    @SerialName("restaurants_within_500m") val restaurantsWithin500m: Int = 0,
-    @SerialName("convenience_stores_within_500m") val convenienceStoresWithin500m: Int = 0,
-    @SerialName("price_min") val priceMin: Double = 0.0,
-    @SerialName("price_max") val priceMax: Double = 0.0,
+    @SerialName("stationDistanceKm") val stationDistanceKm: Double = 0.0,
+    @SerialName("taxiPrice") val taxiPrice: Double = 0.0,
+    @SerialName("busStopMeters") val busStopMeters: Int = 0,
+    @SerialName("busLines") val busLines: List<String> = emptyList(),
+    @SerialName("restaurantsWithin500m") val restaurantsWithin500m: Int = 0,
+    @SerialName("convenienceStoresWithin500m") val convenienceStoresWithin500m: Int = 0,
+    @SerialName("priceMin") val priceMin: Double = 0.0,
+    @SerialName("priceMax") val priceMax: Double = 0.0,
     val phone: String = ""
 )
 
@@ -99,7 +110,7 @@ data class HotelCard(
 data class EmergencyPlan(
     val weather: List<EmergencyOption> = emptyList(),
     val health: List<EmergencyOption> = emptyList(),
-    @SerialName("transport_delay") val transportDelay: List<EmergencyOption> = emptyList()
+    @SerialName("transportDelay") val transportDelay: List<EmergencyOption> = emptyList()
 )
 
 @Serializable
@@ -134,4 +145,17 @@ data class TripHistory(
     @SerialName("title") val title: String = "",
     @SerialName("date_range") val dateRange: String = "",
     @SerialName("viewed_at") val viewedAt: Long = 0L
+)
+
+@Serializable
+data class WeatherInfo(
+    val date: String = "",
+    val city: String = "",
+    val tempMax: Int = 0,
+    val tempMin: Int = 0,
+    val textDay: String = "",
+    val icon: String = "",
+    val windDir: String = "",
+    val windScale: String = "",
+    val humidity: Int = 0
 )
