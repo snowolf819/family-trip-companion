@@ -119,7 +119,7 @@ fun HomeScreen(
                     ) {
                         Icon(
                             Icons.Default.Info,
-                            contentDescription = null,
+                            contentDescription = "提示",
                             tint = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -165,7 +165,7 @@ fun HomeScreen(
                             ) {
                                 Icon(
                                     Icons.Default.History,
-                                    contentDescription = null,
+                                    contentDescription = "历史记录",
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))

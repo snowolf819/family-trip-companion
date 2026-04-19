@@ -55,7 +55,7 @@ fun PackingScreen(
         if (uiState.packingError != null) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.ErrorOutline, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.error)
+                    Icon(Icons.Default.ErrorOutline, contentDescription = "错误", modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.error)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(uiState.packingError!!, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                 }
@@ -82,7 +82,7 @@ fun PackingScreen(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.WbSunny, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Default.WbSunny, contentDescription = "天气", tint = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(packingList.weatherNote, style = MaterialTheme.typography.bodyLarge)
                         }

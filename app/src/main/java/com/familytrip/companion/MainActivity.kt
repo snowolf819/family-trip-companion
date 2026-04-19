@@ -12,8 +12,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val prefsManager = PreferencesManager(applicationContext)
-        val deepLinkToken = intent?.data?.path?.let { path ->
-            if (path.startsWith("/parent/")) path.removePrefix("/parent/").trim() else null
+        val uri = intent?.data
+        val deepLinkToken = when {
+            uri?.path?.startsWith("/parent/") == true -> {
+                uri.path!!.removePrefix("/parent/").trim()
+            }
+            uri?.getQueryParameter("token") != null -> {
+                uri.getQueryParameter("token")!!.trim()
+            }
+            else -> null
         }
         setContent {
             FamilyTripCompanionTheme(prefsManager = prefsManager) {

@@ -16,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.familytrip.companion.data.model.Trip
-import com.familytrip.companion.data.model.TripDay
+import com.familytrip.companion.data.model.*
+import java.time.LocalDate
 import com.familytrip.companion.viewmodel.TripViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,7 +97,7 @@ fun TripOverviewScreen(
                     modifier = Modifier.fillMaxWidth().height(60.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Icon(Icons.Default.Luggage, contentDescription = null)
+                    Icon(Icons.Default.Luggage, contentDescription = "行李")
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("查看行李清单", style = MaterialTheme.typography.titleMedium)
                 }
@@ -105,6 +105,17 @@ fun TripOverviewScreen(
             item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
+}
+
+private fun formatDate(dateStr: String): String {
+    return try {
+        val date = LocalDate.parse(dateStr)
+        val dayOfWeek = when (date.dayOfWeek.value) {
+            1 -> "周一"; 2 -> "周二"; 3 -> "周三"; 4 -> "周四"
+            5 -> "周五"; 6 -> "周六"; 7 -> "周日"; else -> ""
+        }
+        "${date.monthValue}月${date.dayOfMonth}日 $dayOfWeek"
+    } catch (_: Exception) { dateStr }
 }
 
 @Composable
@@ -117,20 +128,20 @@ private fun OverviewHeader(trip: Trip) {
             Text(trip.title.ifBlank { "未命名行程" }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Default.DateRange, contentDescription = "日期", tint = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("${trip.dateRange.start} ~ ${trip.dateRange.end}", style = MaterialTheme.typography.bodyLarge)
+                Text("${formatDate(trip.dateRange.start)} ~ ${formatDate(trip.dateRange.end)}", style = MaterialTheme.typography.bodyLarge)
             }
             Spacer(modifier = Modifier.height(4.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.LocationCity, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Default.LocationCity, contentDescription = "城市", tint = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.width(8.dp))
                 val cities = trip.days.map { it.city }.distinct()
                 Text(cities.joinToString(" → "), style = MaterialTheme.typography.bodyLarge)
             }
             Spacer(modifier = Modifier.height(4.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.People, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Default.People, contentDescription = "出行人数", tint = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("${trip.travelers.count}人出行", style = MaterialTheme.typography.bodyLarge)
             }
@@ -164,7 +175,7 @@ private fun EmergencyContactCard(trip: Trip) {
 
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Row(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -215,7 +226,7 @@ private fun DayCard(day: TripDay, dayIndex: Int, onClick: () -> Unit) {
                     )
                 }
             }
-            Icon(Icons.Default.ChevronRight, contentDescription = null)
+            Icon(Icons.Default.ChevronRight, contentDescription = "查看详情")
         }
     }
 }

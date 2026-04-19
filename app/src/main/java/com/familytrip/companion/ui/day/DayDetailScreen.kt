@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.familytrip.companion.data.model.*
+import com.familytrip.companion.data.model.SegmentType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,15 +86,15 @@ fun DayDetailScreen(
     }
 }
 
-private val segmentIcon: (String) -> androidx.compose.ui.graphics.vector.ImageVector = { type ->
+private val segmentIcon: (SegmentType) -> androidx.compose.ui.graphics.vector.ImageVector = { type ->
     when (type) {
-        "arrive" -> Icons.Default.FlightLand
-        "intercity" -> Icons.Default.Train
-        "sightseeing" -> Icons.Default.CameraAlt
-        "meal" -> Icons.Default.Restaurant
-        "hotel" -> Icons.Default.Hotel
-        "free" -> Icons.Default.FreeBreakfast
-        "transport" -> Icons.Default.DirectionsBus
+        SegmentType.ARRIVE -> Icons.Default.FlightLand
+        SegmentType.INTERCITY -> Icons.Default.Train
+        SegmentType.SIGHTSEEING -> Icons.Default.CameraAlt
+        SegmentType.MEAL -> Icons.Default.Restaurant
+        SegmentType.HOTEL -> Icons.Default.Hotel
+        SegmentType.FREE -> Icons.Default.FreeBreakfast
+        SegmentType.TRANSPORT -> Icons.Default.DirectionsBus
         else -> Icons.Default.Place
     }
 }
@@ -108,7 +109,7 @@ private fun SegmentCard(segment: TripSegment) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     segmentIcon(segment.type),
-                    contentDescription = null,
+                    contentDescription = segment.type.name,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(28.dp)
                 )
@@ -125,7 +126,7 @@ private fun SegmentCard(segment: TripSegment) {
             segment.transport?.let { t ->
                 Spacer(modifier = Modifier.height(8.dp))
                 Row {
-                    Icon(Icons.Default.Schedule, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Default.Schedule, contentDescription = "时间", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.width(4.dp))
                     val info = buildString {
                         t.departureTime?.let { append(it) }
@@ -137,7 +138,7 @@ private fun SegmentCard(segment: TripSegment) {
                 }
                 t.pricePerPerson?.let { price ->
                     Row {
-                        Icon(Icons.Default.AttachMoney, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.AttachMoney, contentDescription = "价格", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("¥${price.toInt()}/人", style = MaterialTheme.typography.bodyMedium)
                     }
@@ -149,7 +150,7 @@ private fun SegmentCard(segment: TripSegment) {
                 if (dist > 0) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Row {
-                        Icon(Icons.Default.DirectionsWalk, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.DirectionsWalk, contentDescription = "步行距离", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("步行${dist}米", style = MaterialTheme.typography.bodyMedium)
                     }
@@ -160,7 +161,7 @@ private fun SegmentCard(segment: TripSegment) {
             segment.ticketPrice?.let { price ->
                 Spacer(modifier = Modifier.height(4.dp))
                 Row {
-                    Icon(Icons.Default.ConfirmationNumber, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Default.ConfirmationNumber, contentDescription = "门票", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("门票 ¥${price.toInt()}", style = MaterialTheme.typography.bodyMedium)
                 }
@@ -168,7 +169,7 @@ private fun SegmentCard(segment: TripSegment) {
             segment.mealPrice?.let { price ->
                 Spacer(modifier = Modifier.height(4.dp))
                 Row {
-                    Icon(Icons.Default.Restaurant, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Default.Restaurant, contentDescription = "用餐", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("人均 ¥${price.toInt()}", style = MaterialTheme.typography.bodyMedium)
                 }
@@ -195,7 +196,7 @@ private fun SegmentCard(segment: TripSegment) {
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(modifier = Modifier.padding(10.dp)) {
-                        Icon(Icons.Default.Accessible, contentDescription = null, tint = com.familytrip.companion.ui.theme.ElderlyTip, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Accessible, contentDescription = "适老提示", tint = com.familytrip.companion.ui.theme.ElderlyTip, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(note, style = MaterialTheme.typography.bodyMedium, color = com.familytrip.companion.ui.theme.ElderlyTip)
                     }
@@ -211,7 +212,7 @@ private fun SegmentCard(segment: TripSegment) {
                 ) {
                     Column(modifier = Modifier.padding(10.dp)) {
                         Row {
-                            Icon(Icons.Default.Warning, contentDescription = null, tint = com.familytrip.companion.ui.theme.Warning, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.Warning, contentDescription = "警告", tint = com.familytrip.companion.ui.theme.Warning, modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("注意事项", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = com.familytrip.companion.ui.theme.Warning)
                         }
@@ -239,7 +240,7 @@ private fun HotelCardComposable(hotel: HotelCard) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Hotel, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Default.Hotel, contentDescription = "酒店", tint = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(hotel.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.weight(1f))
@@ -282,7 +283,7 @@ private fun EmergencyPlanCard(plan: EmergencyPlan) {
                 IconButton(onClick = { expanded = !expanded }) {
                     Icon(
                         if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = null
+                        contentDescription = if (expanded) "收起" else "展开"
                     )
                 }
             }

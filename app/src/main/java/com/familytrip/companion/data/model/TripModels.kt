@@ -33,11 +33,22 @@ data class TripDay(
     @SerialName("hotel_card") val hotelCard: HotelCard? = null,
     @SerialName("emergency_plan") val emergencyPlan: EmergencyPlan? = null
 )
+@Serializable
+enum class SegmentType {
+    @SerialName("arrive") ARRIVE,
+    @SerialName("intercity") INTERCITY,
+    @SerialName("sightseeing") SIGHTSEEING,
+    @SerialName("meal") MEAL,
+    @SerialName("hotel") HOTEL,
+    @SerialName("free") FREE,
+    @SerialName("transport") TRANSPORT,
+    @SerialName("other") OTHER;
+}
 
 @Serializable
 data class TripSegment(
     val id: String = "",
-    val type: String = "",
+    val type: SegmentType = SegmentType.OTHER,
     val title: String = "",
     val subtitle: String? = null,
     val transport: TransportInfo? = null,
