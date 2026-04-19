@@ -119,8 +119,8 @@ data class PackingItem(
 
 @Serializable
 data class TripHistory(
-    val token: String,
-    val title: String,
-    val dateRange: String,
-    val viewedAt: Long
+    @SerialName("token") val token: String = "",
+    @SerialName("title") val title: String = "",
+    @SerialName("date_range") val dateRange: String = "",
+    @SerialName("viewed_at") val viewedAt: Long = 0L
 )

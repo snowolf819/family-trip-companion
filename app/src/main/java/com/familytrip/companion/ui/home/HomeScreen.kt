@@ -8,7 +8,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,6 +27,7 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var tokenInput by remember { mutableStateOf("") }
+    var showClearDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(deepLinkToken) {
         if (!deepLinkToken.isNullOrBlank() && tokenInput.isBlank()) {
@@ -103,6 +106,39 @@ fun HomeScreen(
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
+            // Guide card when no server configured
+            val baseUrl by viewModel.baseUrl.collectAsState()
+            if (baseUrl.isBlank()) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                "请先配置服务器地址",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                            Text(
+                                "前往 设置 页面填写 API 地址后即可使用",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
+                    }
+                }
+            }
+
             // History
             if (uiState.history.isNotEmpty()) {
                 HorizontalDivider()
@@ -152,13 +188,31 @@ fun HomeScreen(
                 // P2-15: Clear history button
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
-                    onClick = { viewModel.clearHistory() },
+                    onClick = { showClearDialog = true },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
                     Text("清除历史记录")
                 }
+
+                if (showClearDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showClearDialog = false },
+                        title = { Text("确认清除") },
+                        text = { Text("确定要清除所有历史记录吗？此操作不可撤销。") },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                viewModel.clearHistory()
+                                showClearDialog = false
+                            }) { Text("清除", color = MaterialTheme.colorScheme.error) }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showClearDialog = false }) { Text("取消") }
+                        }
+                    )
+                }
+
             }
         }
     }

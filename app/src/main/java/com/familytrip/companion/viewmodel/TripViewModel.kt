@@ -37,6 +37,8 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(TripUiState())
     val uiState: StateFlow<TripUiState> = _uiState.asStateFlow()
 
+    val baseUrl: StateFlow<String> = prefsManager.baseUrl.stateIn(viewModelScope, SharingStarted.Lazily, "")
+
     // P1-10: cached OkHttpClient
     private var cachedClient: OkHttpClient? = null
     private var api: TripApiService? = null
