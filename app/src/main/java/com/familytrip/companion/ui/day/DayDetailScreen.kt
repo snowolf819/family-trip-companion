@@ -41,7 +41,15 @@ fun DayDetailScreen(
     ) { padding ->
         if (day == null) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("暂无数据", style = MaterialTheme.typography.bodyLarge)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("暂无数据", style = MaterialTheme.typography.bodyLarge)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = onBack, shape = RoundedCornerShape(12.dp)) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("返回")
+                    }
+                }
             }
             return@Scaffold
         }
@@ -63,6 +71,28 @@ fun DayDetailScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
+            // Weather error
+            if (uiState.weatherError != null) {
+                item {
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                "天气加载失败: ${uiState.weatherError}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+                }
+            }
             // Weather card
             weather?.let { w ->
                 item {
