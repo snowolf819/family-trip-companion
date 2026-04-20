@@ -345,7 +345,7 @@ private fun HotelCardComposable(hotel: HotelCard) {
 
 @Composable
 private fun EmergencyPlanCard(plan: EmergencyPlan) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(true) }
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
@@ -370,6 +370,9 @@ private fun EmergencyPlanCard(plan: EmergencyPlan) {
                     Text("🌧 天气应急", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     plan.weather.forEach { opt ->
                         Text("• ${opt.title}: ${opt.detail}", style = MaterialTheme.typography.bodyMedium)
+                        opt.tips?.forEach { tip ->
+                            Text("  💡 $tip", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -377,6 +380,9 @@ private fun EmergencyPlanCard(plan: EmergencyPlan) {
                     Text("🏥 健康应急", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     plan.health.forEach { opt ->
                         Text("• ${opt.title}: ${opt.detail}", style = MaterialTheme.typography.bodyMedium)
+                        opt.tips?.forEach { tip ->
+                            Text("  💡 $tip", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -384,6 +390,9 @@ private fun EmergencyPlanCard(plan: EmergencyPlan) {
                     Text("🚄 交通延误", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     plan.transportDelay.forEach { opt ->
                         Text("• ${opt.title}: ${opt.detail}", style = MaterialTheme.typography.bodyMedium)
+                        opt.tips?.forEach { tip ->
+                            Text("  💡 $tip", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 }
             }
