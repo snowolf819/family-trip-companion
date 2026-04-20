@@ -27,6 +27,7 @@ data class TripUiState(
     val packingError: String? = null,
     val isPackingLoading: Boolean = false,
     val weather: List<WeatherInfo> = emptyList(),
+    val weatherError: String? = null,
     val error: String? = null,
     val history: List<TripHistory> = emptyList()
 )
@@ -96,13 +97,18 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // P1-8 + P1-10: weather with error state + Result wrapper
     fun loadWeather(tripId: String) {
         viewModelScope.launch {
-            val service = api ?: return@launch
-            try {
-                val w = service.getWeather(tripId)
-                _uiState.update { it.copy(weather = w) }
-            } catch (_: Exception) { }
+            val repository = repo ?: return@launch
+            _uiState.update { it.copy(weatherError = null) }
+            repository.getWeather(tripId)
+                .onSuccess { w ->
+                    _uiState.update { it.copy(weather = w, weatherError = null) }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(weatherError = friendlyError(e)) }
+                }
         }
     }
 
@@ -120,6 +126,15 @@ class TripViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // P1-7: packing checked items persistence
+    fun getPackingCheckedFlow(tripId: String): Flow<Set<String>> =
+        if (tripId.isEmpty()) flowOf(emptySet()) else prefsManager.getPackingChecked(tripId)
+
+    fun savePackingChecked(tripId: String, checked: Set<String>) {
+        viewModelScope.launch { prefsManager.savePackingChecked(tripId, checked) }
+    }
+
     fun clearHistory() { viewModelScope.launch { prefsManager.clearHistory() } }
     fun clearError() { _uiState.update { it.copy(error = null) } }
+    fun clearWeatherError() { _uiState.update { it.copy(weatherError = null) } }
 }

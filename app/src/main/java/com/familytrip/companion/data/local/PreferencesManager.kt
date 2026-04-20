@@ -58,4 +58,18 @@ class PreferencesManager(private val context: Context) {
     suspend fun clearHistory() {
         context.dataStore.edit { it[KEY_HISTORY] = "[]" }
     }
+
+    // P1-7: Packing list checked items persistence
+    fun getPackingChecked(tripId: String): Flow<Set<String>> {
+        val key = stringPreferencesKey("packing_checked_$tripId")
+        return context.dataStore.data.map { prefs ->
+            val raw = prefs[key] ?: ""
+            if (raw.isEmpty()) emptySet() else raw.split(",").toSet()
+        }
+    }
+
+    suspend fun savePackingChecked(tripId: String, checked: Set<String>) {
+        val key = stringPreferencesKey("packing_checked_$tripId")
+        context.dataStore.edit { it[key] = checked.joinToString(",") }
+    }
 }

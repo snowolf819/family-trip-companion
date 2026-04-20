@@ -1,6 +1,7 @@
 package com.familytrip.companion
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -8,19 +9,34 @@ import com.familytrip.companion.data.local.PreferencesManager
 import com.familytrip.companion.ui.theme.FamilyTripCompanionTheme
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        private const val TAG = "MainActivity"
+        private val TOKEN_REGEX = Regex("^[a-zA-Z0-9_-]{1,128}$")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val prefsManager = PreferencesManager(applicationContext)
         val uri = intent?.data
-        val deepLinkToken = when {
+        var deepLinkToken: String? = null
+        when {
             uri?.path?.startsWith("/parent/") == true -> {
-                uri.path!!.removePrefix("/parent/").trim()
+                val raw = uri.path!!.removePrefix("/parent/").trim()
+                if (TOKEN_REGEX.matches(raw)) {
+                    deepLinkToken = raw
+                } else {
+                    Log.w(TAG, "Invalid deep link token rejected: length=${raw.length}")
+                }
             }
             uri?.getQueryParameter("token") != null -> {
-                uri.getQueryParameter("token")!!.trim()
+                val raw = uri.getQueryParameter("token")!!.trim()
+                if (TOKEN_REGEX.matches(raw)) {
+                    deepLinkToken = raw
+                } else {
+                    Log.w(TAG, "Invalid query token rejected: length=${raw.length}")
+                }
             }
-            else -> null
         }
         setContent {
             FamilyTripCompanionTheme(prefsManager = prefsManager) {

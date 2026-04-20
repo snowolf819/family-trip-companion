@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -25,7 +26,23 @@ fun PackingScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val packingList = uiState.packingList
-    val checkedItems = remember { mutableStateMapOf<String, Boolean>() }
+    val tripId = packingList?.tripId ?: ""
+
+    // P1-7: Load persisted checked items
+    val persistedChecked by viewModel.getPackingCheckedFlow(tripId).collectAsState(initial = emptySet())
+    val checkedItems = remember(tripId) { mutableStateMapOf<String, Boolean>() }
+
+    // Sync from persisted state
+    LaunchedEffect(persistedChecked) {
+        checkedItems.clear()
+        persistedChecked.forEach { checkedItems[it] = true }
+    }
+
+    // Persist on change
+    fun onCheckedChanged(itemId: String, checked: Boolean) {
+        checkedItems[itemId] = checked
+        viewModel.savePackingChecked(tripId, checkedItems.filterValues { it }.keys)
+    }
 
     Scaffold(
         topBar = {
@@ -91,7 +108,9 @@ fun PackingScreen(
             }
 
             items(packingList.categories) { category ->
-                PackingCategorySection(category, checkedItems)
+                PackingCategorySection(category, checkedItems) { itemId, checked ->
+                    onCheckedChanged(itemId, checked)
+                }
             }
 
             item {
@@ -119,7 +138,8 @@ fun PackingScreen(
 @Composable
 private fun PackingCategorySection(
     category: PackingCategory,
-    checkedItems: MutableMap<String, Boolean>
+    checkedItems: MutableMap<String, Boolean>,
+    onCheckedChanged: (String, Boolean) -> Unit
 ) {
     Card(shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -132,7 +152,7 @@ private fun PackingCategorySection(
                 ) {
                     Checkbox(
                         checked = checkedItems[item.id] ?: item.checked ?: false,
-                        onCheckedChange = { checked -> checkedItems[item.id] = checked }
+                        onCheckedChange = { checked -> onCheckedChanged(item.id, checked) }
                     )
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {

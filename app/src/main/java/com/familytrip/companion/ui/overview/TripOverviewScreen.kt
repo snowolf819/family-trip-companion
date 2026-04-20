@@ -64,6 +64,29 @@ fun TripOverviewScreen(
         ) {
             item { OverviewHeader(trip) }
 
+            // P1-8: Weather error display
+            if (uiState.weatherError != null) {
+                item {
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                "天气加载失败: ${uiState.weatherError}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+                }
+            }
+
             // Weather section
             if (uiState.weather.isNotEmpty()) {
                 item { WeatherSection(uiState.weather) }

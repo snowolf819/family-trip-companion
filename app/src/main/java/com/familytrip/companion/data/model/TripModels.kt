@@ -9,11 +9,14 @@ data class Trip(
     val title: String = "",
     @SerialName("date_range") val dateRange: DateRange = DateRange(),
     val travelers: Travelers = Travelers(),
+    val preferences: TripPreferences = TripPreferences(),
     val days: List<TripDay> = emptyList(),
-    @SerialName("emergency_contact") val emergencyContact: EmergencyContact = EmergencyContact(),
-    @SerialName("parent_share_token") val parentShareToken: String = "",
-    @SerialName("created_at") val createdAt: String = "",
-    @SerialName("updated_at") val updatedAt: String = ""
+    val pushSettings: PushSettings = PushSettings(),
+    val conflicts: List<ConflictItem> = emptyList(),
+    @SerialName("emergencyContact") val emergencyContact: EmergencyContact = EmergencyContact(),
+    @SerialName("parentShareToken") val parentShareToken: String = "",
+    @SerialName("createdAt") val createdAt: String = "",
+    @SerialName("updatedAt") val updatedAt: String = ""
 )
 
 @Serializable
@@ -21,6 +24,39 @@ data class DateRange(val start: String = "", val end: String = "")
 
 @Serializable
 data class Travelers(val type: String = "", val count: Int = 0, @SerialName("avg_age") val avgAge: Int = 0)
+
+// P0-2: Missing data classes for preferences/pushSettings/conflicts
+@Serializable
+data class TripPreferences(
+    @SerialName("transport_priority") val transportPriority: String = "public",
+    val pace: String = "normal",
+    @SerialName("diet_diversity") val dietDiversity: Boolean = false,
+    @SerialName("budget_first") val budgetFirst: Boolean = false,
+    @SerialName("scenicMustVisit") val scenicMustVisit: List<String> = emptyList(),
+    @SerialName("scenicAvoid") val scenicAvoid: List<String> = emptyList()
+)
+
+@Serializable
+data class PushSettings(
+    val phone: String = "",
+    @SerialName("sendImmediately") val sendImmediately: Boolean = true,
+    @SerialName("remindBeforeDay") val remindBeforeDay: Boolean = true,
+    @SerialName("dailyMorningReminder") val dailyMorningReminder: Boolean = true,
+    val channels: List<String> = emptyList()
+)
+
+@Serializable
+data class ConflictItem(
+    val id: String = "",
+    val field: String = "",
+    val title: String = "",
+    val status: String = "single-source",
+    val options: List<ConflictOption> = emptyList(),
+    @SerialName("selectedSource") val selectedSource: String? = null
+)
+
+@Serializable
+data class ConflictOption(val source: String = "", val value: String = "")
 
 @Serializable
 data class TripDay(
@@ -33,6 +69,7 @@ data class TripDay(
     @SerialName("hotelCard") val hotelCard: HotelCard? = null,
     @SerialName("emergencyPlan") val emergencyPlan: EmergencyPlan? = null
 )
+
 @Serializable
 enum class SegmentType {
     @SerialName("arrive") ARRIVE,

@@ -28,11 +28,20 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     var tokenInput by remember { mutableStateOf("") }
     var showClearDialog by remember { mutableStateOf(false) }
+    var hasNavigated by remember { mutableStateOf(false) }
 
+    // Deep link: load trip and wait for it before navigating
     LaunchedEffect(deepLinkToken) {
         if (!deepLinkToken.isNullOrBlank() && tokenInput.isBlank()) {
             tokenInput = deepLinkToken
             viewModel.loadTrip(deepLinkToken)
+        }
+    }
+
+    // Navigate once trip is loaded (fixes race condition)
+    LaunchedEffect(uiState.trip, uiState.error) {
+        if (uiState.trip != null && !hasNavigated && tokenInput.isNotBlank()) {
+            hasNavigated = true
             onNavigateToTrip()
         }
     }
@@ -78,15 +87,19 @@ fun HomeScreen(
             Button(
                 onClick = {
                     if (tokenInput.isNotBlank()) {
+                        hasNavigated = false
                         viewModel.loadTrip(tokenInput)
-                        onNavigateToTrip()
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(64.dp),
                 shape = RoundedCornerShape(16.dp),
-                enabled = tokenInput.isNotBlank()
+                enabled = tokenInput.isNotBlank() && !uiState.isLoading
             ) {
-                Text("查看行程", style = MaterialTheme.typography.titleMedium)
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                } else {
+                    Text("查看行程", style = MaterialTheme.typography.titleMedium)
+                }
             }
 
             if (uiState.error != null) {
@@ -153,8 +166,8 @@ fun HomeScreen(
                         Card(
                             onClick = {
                                 tokenInput = item.token
+                                hasNavigated = false
                                 viewModel.loadTrip(item.token)
-                                onNavigateToTrip()
                             },
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.fillMaxWidth()
@@ -185,7 +198,6 @@ fun HomeScreen(
                     }
                 }
 
-                // P2-15: Clear history button
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = { showClearDialog = true },
@@ -212,7 +224,6 @@ fun HomeScreen(
                         }
                     )
                 }
-
             }
         }
     }
