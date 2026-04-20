@@ -106,7 +106,7 @@ fun DayDetailScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(w.icon, style = MaterialTheme.typography.headlineMedium)
+                                Text(mapWeatherIcon(w.icon), style = MaterialTheme.typography.headlineMedium)
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
                                     Text(w.textDay, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -397,5 +397,25 @@ private fun EmergencyPlanCard(plan: EmergencyPlan) {
                 }
             }
         }
+    }
+}
+
+private fun mapWeatherIcon(icon: String): String {
+    if (icon.isNotBlank() && !icon.all { it.isDigit() }) return icon
+    return when (icon) {
+        "100" -> "☀️"  "101" -> "☁️"  "102" -> "⛅"  "103" -> "☁️"  "104" -> "☁️"
+        "150" -> "🌙"  "153" -> "🌙"  "154" -> "☁️"
+        "300" -> "🌦"  "301" -> "🌧"  "302" -> "⛈"  "303" -> "⛈"  "304" -> "⛈"
+        "305" -> "🌧"  "306" -> "🌧"  "307" -> "🌧"  "308" -> "🌧"  "309" -> "🌧"
+        "310" -> "⛈"  "311" -> "⛈"  "312" -> "⛈"  "313" -> "🧊"  "314" -> "🌧"
+        "315" -> "🌧"  "316" -> "🌧"  "399" -> "🌧"
+        "400" -> "❄️"  "401" -> "❄️"  "402" -> "❄️"  "403" -> "❄️"
+        "404" -> "🌨"  "405" -> "🌨"  "406" -> "🌨"  "407" -> "❄️"
+        "408" -> "❄️"  "409" -> "❄️"  "410" -> "❄️"  "499" -> "❄️"
+        "500" -> "🌫"  "501" -> "🌫"  "502" -> "🌫"  "503" -> "🌪"
+        "504" -> "🌫"  "507" -> "🌪"  "508" -> "🌪"
+        "509" -> "🌫"  "510" -> "🌫"  "511" -> "🌫"  "512" -> "🌫"  "513" -> "🌫"
+        "900" -> "🌡"  "901" -> "❄️"
+        else -> "🌤"
     }
 }

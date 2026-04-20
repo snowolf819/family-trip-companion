@@ -151,7 +151,7 @@ private fun PackingCategorySection(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                 ) {
                     Checkbox(
-                        checked = checkedItems[item.id] ?: item.checked ?: false,
+                        checked = checkedItems[item.id] ?: false,
                         onCheckedChange = { checked -> onCheckedChanged(item.id, checked) }
                     )
                     Column(modifier = Modifier.weight(1f)) {

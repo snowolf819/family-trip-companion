@@ -159,7 +159,7 @@ private fun WeatherSection(weather: List<WeatherInfo>) {
             ) {
                 weather.forEach { w ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(w.icon, style = MaterialTheme.typography.titleMedium)
+                        Text(mapWeatherIcon(w.icon), style = MaterialTheme.typography.titleMedium)
                         Text("${w.tempMin}°~${w.tempMax}°", style = MaterialTheme.typography.labelSmall)
                         Text(w.textDay, style = MaterialTheme.typography.labelSmall, maxLines = 1)
                     }
@@ -278,7 +278,7 @@ private fun DayCard(day: TripDay, dayIndex: Int, onClick: () -> Unit, weather: W
                 }
                 weather?.let { w ->
                     Text(
-                        "${w.icon} ${w.tempMin}°~${w.tempMax}° ${w.textDay}",
+                        "${mapWeatherIcon(w.icon)} ${w.tempMin}°~${w.tempMax}° ${w.textDay}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -286,5 +286,25 @@ private fun DayCard(day: TripDay, dayIndex: Int, onClick: () -> Unit, weather: W
             }
             Icon(Icons.Default.ChevronRight, contentDescription = "查看详情")
         }
+    }
+}
+
+private fun mapWeatherIcon(icon: String): String {
+    if (icon.isNotBlank() && !icon.all { it.isDigit() }) return icon
+    return when (icon) {
+        "100" -> "☀️"  "101" -> "☁️"  "102" -> "⛅"  "103" -> "☁️"  "104" -> "☁️"
+        "150" -> "🌙"  "153" -> "🌙"  "154" -> "☁️"
+        "300" -> "🌦"  "301" -> "🌧"  "302" -> "⛈"  "303" -> "⛈"  "304" -> "⛈"
+        "305" -> "🌧"  "306" -> "🌧"  "307" -> "🌧"  "308" -> "🌧"  "309" -> "🌧"
+        "310" -> "⛈"  "311" -> "⛈"  "312" -> "⛈"  "313" -> "🧊"  "314" -> "🌧"
+        "315" -> "🌧"  "316" -> "🌧"  "399" -> "🌧"
+        "400" -> "❄️"  "401" -> "❄️"  "402" -> "❄️"  "403" -> "❄️"
+        "404" -> "🌨"  "405" -> "🌨"  "406" -> "🌨"  "407" -> "❄️"
+        "408" -> "❄️"  "409" -> "❄️"  "410" -> "❄️"  "499" -> "❄️"
+        "500" -> "🌫"  "501" -> "🌫"  "502" -> "🌫"  "503" -> "🌪"
+        "504" -> "🌫"  "507" -> "🌪"  "508" -> "🌪"
+        "509" -> "🌫"  "510" -> "🌫"  "511" -> "🌫"  "512" -> "🌫"  "513" -> "🌫"
+        "900" -> "🌡"  "901" -> "❄️"
+        else -> "🌤"
     }
 }
